@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'database/database.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -65,6 +70,10 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+    final database = AppDatabase();
+    database
+        .into(database.todoEntries)
+        .insert(TodoEntriesCompanion.insert(description: 'test'));
   }
 
   @override
