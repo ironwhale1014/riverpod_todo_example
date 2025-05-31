@@ -56,8 +56,69 @@ i1.GeneratedColumn<DateTime> _column_2(String aliasedName) =>
       true,
       type: i1.DriftSqlType.dateTime,
     );
+
+final class Schema3 extends i0.VersionedSchema {
+  Schema3({required super.database}) : super(version: 3);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    todoEntries,
+    textEntries,
+    todosInsert,
+    todosDelete,
+    todosUpdate,
+  ];
+  late final Shape0 todoEntries = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'todo_entries',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 textEntries = Shape1(
+    source: i0.VersionedVirtualTable(
+      entityName: 'text_entries',
+      moduleAndArgs:
+          'fts5(description, content=todo_entries, content_rowid=id)',
+      columns: [_column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger todosInsert = i1.Trigger(
+    'CREATE TRIGGER todos_insert AFTER INSERT ON todo_entries BEGIN INSERT INTO text_entries ("rowid", description) VALUES (new.id, new.description);END',
+    'todos_insert',
+  );
+  final i1.Trigger todosDelete = i1.Trigger(
+    'CREATE TRIGGER todos_delete AFTER DELETE ON todo_entries BEGIN INSERT INTO text_entries (text_entries, "rowid", description) VALUES (\'delete\', old.id, old.description);END',
+    'todos_delete',
+  );
+  final i1.Trigger todosUpdate = i1.Trigger(
+    'CREATE TRIGGER todos_update AFTER UPDATE ON todo_entries BEGIN INSERT INTO text_entries (text_entries, "rowid", description) VALUES (\'delete\', new.id, new.description);INSERT INTO text_entries ("rowid", description) VALUES (new.id, new.description);END',
+    'todos_update',
+  );
+}
+
+class Shape1 extends i0.VersionedVirtualTable {
+  Shape1({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get description =>
+      columnsByName['description']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_3(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'description',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: '',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -66,6 +127,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from1To2(migrator, schema);
         return 2;
+      case 2:
+        final schema = Schema3(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from2To3(migrator, schema);
+        return 3;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -74,6 +140,7 @@ i0.MigrationStepWithVersion migrationSteps({
 
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
 }) => i0.VersionedSchema.stepByStepHelper(
-  step: migrationSteps(from1To2: from1To2),
+  step: migrationSteps(from1To2: from1To2, from2To3: from2To3),
 );
