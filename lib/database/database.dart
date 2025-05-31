@@ -16,7 +16,7 @@ AppDatabase appDatabase(Ref ref) {
   return AppDatabase();
 }
 
-@DriftDatabase(tables: [TodoEntries],include: {'sql.drift'})
+@DriftDatabase(tables: [TodoEntries], include: {'sql.drift'})
 class AppDatabase extends _$AppDatabase {
   AppDatabase()
     : super(
@@ -28,7 +28,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   // TODO: implement migration
@@ -38,11 +38,14 @@ class AppDatabase extends _$AppDatabase {
         from1To2: (m, schema) async {
           await m.addColumn(schema.todoEntries, schema.todoEntries.dueDate);
         },
-        from2To3: (m,schema) async{
+        from2To3: (m, schema) async {
           await m.create(schema.todosDelete);
           await m.create(schema.todosUpdate);
           await m.alterTable(TableMigration(schema.todoEntries));
-        }
+        },
+        from3To4: (m, schema) async {
+          await m.createTable(schema.categories);
+        },
       ),
     );
   }
