@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart' show Colors;
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:drift_flutter/drift_flutter.dart';
 import 'package:drift_todo_train/database/database.steps.dart';
 import 'package:drift_todo_train/database/tables.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -28,7 +30,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   // TODO: implement migration
@@ -46,7 +48,35 @@ class AppDatabase extends _$AppDatabase {
         from3To4: (m, schema) async {
           await m.createTable(schema.categories);
         },
+        from4To5: (m, schema) async {
+          await m.alterTable(TableMigration(schema.todoEntries));
+        },
       ),
+      beforeOpen: (details) async {
+        await customStatement('PRAGMA foreign_keys = ON');
+        if (details.wasCreated) {
+          // Create a bunch of default values so the app doesn't look too empty
+          // on the first start.
+          print("beforeOpen wasCreated");
+          await batch((b) {
+            b.insert(
+              categories,
+              CategoriesCompanion.insert(name: 'Important', color: Colors.red),
+            );
+
+            b.insertAll(todoEntries, [
+              TodoEntriesCompanion.insert(description: 'Check out drift'),
+              TodoEntriesCompanion.insert(
+                description: 'Fix session invalidation bug',
+                category: const Value(1),
+              ),
+              TodoEntriesCompanion.insert(
+                description: 'Add favorite movies to home page',
+              ),
+            ]);
+          });
+        }
+      },
     );
   }
 }
