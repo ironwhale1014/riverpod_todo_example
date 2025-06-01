@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:drift_todo_train/database/database.dart';
+import 'package:drift_todo_train/screen/home/card.dart';
 import 'package:drift_todo_train/screen/home/state.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -40,6 +41,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final currentEntries = ref.watch(entriesInCategory);
+    print(currentEntries);
 
     return Scaffold(
       appBar: AppBar(
@@ -56,7 +58,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           return ListView.builder(
             itemCount: entries.length,
             itemBuilder: (context, index) {
-              return Container();
+              return TodoCard(entries[index].todoEntry);
             },
           );
         },
