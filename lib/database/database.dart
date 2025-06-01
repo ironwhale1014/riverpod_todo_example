@@ -92,7 +92,7 @@ class AppDatabase extends _$AppDatabase {
     return query.map((row) {
       return TodoEntryWithCategory(
         todoEntry: row.readTable(todoEntries),
-        category: row.readTable(categories),
+        category: row.readTableOrNull(categories),
       );
     }).watch();
   }

@@ -1,7 +1,8 @@
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide Column;
 import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/screen/home/state.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -38,6 +39,65 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    final currentEntries = ref.watch(entriesInCategory);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Drift Todo list"),
+        actions: [
+          IconButton(
+            onPressed: () => context.go('/search'),
+            icon: const Icon(Icons.search),
+          ),
+        ],
+      ),
+      body: currentEntries.when(
+        data: (entries) {
+          return ListView.builder(
+            itemCount: entries.length,
+            itemBuilder: (context, index) {
+              return Container();
+            },
+          );
+        },
+        error: (Object error, StackTrace stackTrace) {
+          debugPrintStack(stackTrace: stackTrace, label: error.toString());
+          return const Text('An error has occured');
+        },
+        loading: () => const Align(
+          alignment: Alignment.center,
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      bottomSheet: Material(
+        elevation: 12,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('What needs to be done?'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        onSubmitted: (_) => _addTodoEntry(),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: _addTodoEntry,
+                      icon: const Icon(Icons.send),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
