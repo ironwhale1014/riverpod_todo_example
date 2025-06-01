@@ -56,6 +56,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       body: currentEntries.when(
         data: (entries) {
           return ListView.builder(
+            padding: const EdgeInsets.only(bottom: 100),
             itemCount: entries.length,
             itemBuilder: (context, index) {
               return TodoCard(entries[index].todoEntry);
