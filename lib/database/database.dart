@@ -57,7 +57,6 @@ class AppDatabase extends _$AppDatabase {
         if (details.wasCreated) {
           // Create a bunch of default values so the app doesn't look too empty
           // on the first start.
-          print("beforeOpen wasCreated");
           await batch((b) {
             b.insert(
               categories,
@@ -79,4 +78,29 @@ class AppDatabase extends _$AppDatabase {
       },
     );
   }
+
+  Stream<List<TodoEntryWithCategory>> entriesInCategory(int? categoryId) {
+    final query = select(todoEntries).join([
+      leftOuterJoin(categories, categories.id.equalsExp(todoEntries.category)),
+    ]);
+    if (categoryId != null) {
+      query.where(categories.id.equals(categoryId));
+    } else {
+      query.where(categories.id.isNull());
+    }
+
+    return query.map((row) {
+      return TodoEntryWithCategory(
+        todoEntry: row.readTable(todoEntries),
+        category: row.readTable(categories),
+      );
+    }).watch();
+  }
+}
+
+class TodoEntryWithCategory {
+  final TodoEntry todoEntry;
+  final Category? category;
+
+  TodoEntryWithCategory({required this.todoEntry, required this.category});
 }
