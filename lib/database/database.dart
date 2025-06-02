@@ -95,6 +95,33 @@ class AppDatabase extends _$AppDatabase {
       );
     }).watch();
   }
+
+  Stream<List<CategoryWithCount>> categoriesWithCount() {
+    // the _categoriesWithCount method has been generated automatically based
+    // on the query declared in the @DriftDatabase annotation
+    return _categoriesWithCount().map((row) {
+      final hasId = row.id != null;
+      final category = hasId
+          ? Category(id: row.id!, name: row.name!, color: row.color!)
+          : null;
+
+      return CategoryWithCount(category, row.amount);
+    }).watch();
+  }
+
+
+  Future<void> deleteCategory(Category category) {
+    return transaction(() async {
+      // First, move todo entries that might remain into the default category
+      await (todoEntries.update()
+        ..where((todo) => todo.category.equals(category.id)))
+          .write(const TodoEntriesCompanion(category: Value(null)));
+
+      // Then, delete the category
+      await categories.deleteOne(category);
+    });
+  }
+
 }
 
 class TodoEntryWithCategory {
@@ -102,4 +129,12 @@ class TodoEntryWithCategory {
   final Category? category;
 
   TodoEntryWithCategory({required this.todoEntry, required this.category});
+}
+
+class CategoryWithCount {
+  // can be null, in which case we count how many entries don't have a category
+  final Category? category;
+  final int count; // amount of entries in this category
+
+  CategoryWithCount(this.category, this.count);
 }
