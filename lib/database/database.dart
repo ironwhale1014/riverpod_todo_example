@@ -122,6 +122,10 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  Future<List<TodoEntryWithCategory>>? search(String text) async {
+    return _search(text).map((row)=>TodoEntryWithCategory(todoEntry: row.todos, category: row.cat)).get();
+  }
+
 }
 
 class TodoEntryWithCategory {
