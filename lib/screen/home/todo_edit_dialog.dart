@@ -21,7 +21,6 @@ class _TodoEditDialogState extends ConsumerState<TodoEditDialog> {
 
   @override
   void initState() {
-    // TODO: implement initState
     textController.text = widget.entry.description;
     _dueDate = widget.entry.dueDate;
     super.initState();
@@ -29,7 +28,6 @@ class _TodoEditDialogState extends ConsumerState<TodoEditDialog> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     textController.dispose();
     super.dispose();
   }

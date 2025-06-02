@@ -32,5 +32,7 @@ UNION ALL
 _search: SELECT todos.**, cat.** FROM text_entries
     INNER JOIN todo_entries todos ON todos.id = text_entries.rowid
     LEFT OUTER JOIN categories cat ON cat.id = todos.category
-    WHERE text_entries MATCH :query
+    WHERE text_entries MATCH :query || '*'
     ORDER BY rank;
+
+

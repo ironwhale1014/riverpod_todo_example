@@ -112,7 +112,6 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> deleteCategory(Category category) {
     return transaction(() async {
-      // First, move todo entries that might remain into the default category
       await (todoEntries.update()
         ..where((todo) => todo.category.equals(category.id)))
           .write(const TodoEntriesCompanion(category: Value(null)));
