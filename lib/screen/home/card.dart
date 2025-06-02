@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:drift_todo_train/database/database.dart';
+import 'package:drift_todo_train/screen/home/todo_edit_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -40,7 +41,9 @@ class TodoCard extends ConsumerWidget {
                 ],
               ),
             ),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.edit)),
+            IconButton(onPressed: () {
+              showDialog(context: context, builder: (BuildContext context) =>TodoEditDialog(entry: entry));
+            }, icon: const Icon(Icons.edit)),
             IconButton(color: Colors.red, onPressed: () {
 
               ref.read(appDatabaseProvider).todoEntries.deleteOne(entry);

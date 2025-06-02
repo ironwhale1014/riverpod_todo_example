@@ -28,6 +28,14 @@ class _HomePageState extends ConsumerState<HomePage> {
       final database = ref.read(appDatabaseProvider);
       final currentCategory = ref.read(activeCategory);
 
+      // database
+      //     .into(database.todoEntries)
+      //     .insert(
+      //       TodoEntriesCompanion.insert(
+      //         description: _controller.text,
+      //         category: Value(currentCategory?.id),
+      //       ),
+      //     );
       database.todoEntries.insertOne(
         TodoEntriesCompanion.insert(
           description: _controller.text,
@@ -104,3 +112,4 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 }
+
