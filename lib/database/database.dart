@@ -19,7 +19,9 @@ class AppDatabaseState extends _$AppDatabaseState {
     return AppDatabase();
   }
 
-  void resetDatabase() {
+  void resetDatabase() async {
+    final oldDb = state;
+    await oldDb.close();
     state = AppDatabase();
   }
 }
