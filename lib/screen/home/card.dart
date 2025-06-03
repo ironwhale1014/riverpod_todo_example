@@ -46,7 +46,7 @@ class TodoCard extends ConsumerWidget {
             }, icon: const Icon(Icons.edit)),
             IconButton(color: Colors.red, onPressed: () {
 
-              ref.read(appDatabaseProvider).todoEntries.deleteOne(entry);
+              ref.read(appDatabaseStateProvider).todoEntries.deleteOne(entry);
             }, icon: const Icon(Icons.delete) ),
           ],
         ),

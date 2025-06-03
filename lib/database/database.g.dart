@@ -1525,22 +1525,21 @@ class SearchResult {
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appDatabaseHash() => r'8c69eb46d45206533c176c88a926608e79ca927d';
+String _$appDatabaseStateHash() => r'b01ac03b9ace0f572b30f22e3939c46d67b72d0a';
 
-/// See also [appDatabase].
-@ProviderFor(appDatabase)
-final appDatabaseProvider = Provider<AppDatabase>.internal(
-  appDatabase,
-  name: r'appDatabaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$appDatabaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+/// See also [AppDatabaseState].
+@ProviderFor(AppDatabaseState)
+final appDatabaseStateProvider =
+    NotifierProvider<AppDatabaseState, AppDatabase>.internal(
+      AppDatabaseState.new,
+      name: r'appDatabaseStateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$appDatabaseStateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AppDatabaseRef = ProviderRef<AppDatabase>;
+typedef _$AppDatabaseState = Notifier<AppDatabase>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

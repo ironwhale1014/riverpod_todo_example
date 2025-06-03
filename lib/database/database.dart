@@ -13,9 +13,18 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'database.g.dart';
 
 @Riverpod(keepAlive: true)
-AppDatabase appDatabase(Ref ref) {
-  return AppDatabase();
+class AppDatabaseState extends _$AppDatabaseState {
+  @override
+  AppDatabase build() {
+    return AppDatabase();
+  }
+
+  void resetDatabase() {
+    state = AppDatabase();
+  }
 }
+
+
 
 @DriftDatabase(tables: [TodoEntries], include: {'sql.drift'})
 class AppDatabase extends _$AppDatabase {

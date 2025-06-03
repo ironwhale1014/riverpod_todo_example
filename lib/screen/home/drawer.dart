@@ -24,7 +24,7 @@ class CategoriesDrawer extends ConsumerWidget {
           ),
           Flexible(
             child: StreamBuilder<List<CategoryWithCount>>(
-              stream: ref.watch(appDatabaseProvider).categoriesWithCount(),
+              stream: ref.watch(appDatabaseStateProvider).categoriesWithCount(),
               builder: (context, snapshot) {
                 final categories = snapshot.data ?? <CategoryWithCount>[];
                 return ListView.builder(
@@ -67,7 +67,7 @@ class _CategoryDrawerEntry extends ConsumerWidget {
             onTap: () async {
               final newColor = await _selectColor(context, category.color);
               if (newColor != null) {
-                final update = ref.read(appDatabaseProvider).categories.update()
+                final update = ref.read(appDatabaseStateProvider).categories.update()
                   ..whereSamePrimaryKey(category);
                 await update.write(CategoriesCompanion(color: Value(newColor)));
               }
@@ -130,7 +130,7 @@ class _CategoryDrawerEntry extends ConsumerWidget {
             );
 
             if (confirmed == true) {
-              ref.read(appDatabaseProvider).deleteCategory(category);
+              ref.read(appDatabaseStateProvider).deleteCategory(category);
             }
           },
           icon: Icon(Icons.delete_outline),

@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:drift_todo_train/database/database.dart';
+import 'package:drift_todo_train/screen/backup/backup.dart';
 import 'package:drift_todo_train/screen/home/card.dart';
 import 'package:drift_todo_train/screen/home/drawer.dart';
 import 'package:drift_todo_train/screen/home/state.dart';
@@ -26,7 +27,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   void _addTodoEntry() {
     if (_controller.text.isNotEmpty) {
-      final database = ref.read(appDatabaseProvider);
+      final database = ref.read(appDatabaseStateProvider);
       final currentCategory = ref.read(activeCategory);
 
       // database
@@ -55,6 +56,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       appBar: AppBar(
         title: const Text("Drift Todo list"),
         actions: [
+          const BackUpIcon(),
           IconButton(
             onPressed: () => context.go('/search'),
             icon: const Icon(Icons.search),
