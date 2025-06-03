@@ -19,14 +19,16 @@ class AppDatabaseState extends _$AppDatabaseState {
     return AppDatabase();
   }
 
-  void resetDatabase() {
+  void resetDatabase() async {
+    final oldDb = state;
+    await oldDb.close();
     state = AppDatabase();
   }
 }
 
 
 
-@DriftDatabase(tables: [TodoEntries], include: {'sql.drift'})
+@DriftDatabase(tables: [TodoEntries,Categories], include: {'sql.drift'})
 class AppDatabase extends _$AppDatabase {
   AppDatabase()
     : super(

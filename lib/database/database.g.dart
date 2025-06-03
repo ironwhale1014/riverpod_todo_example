@@ -1525,7 +1525,7 @@ class SearchResult {
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appDatabaseStateHash() => r'b01ac03b9ace0f572b30f22e3939c46d67b72d0a';
+String _$appDatabaseStateHash() => r'03e64e333fe41bb0008a020c62cfd833f7a4567c';
 
 /// See also [AppDatabaseState].
 @ProviderFor(AppDatabaseState)
