@@ -43,19 +43,29 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  // Stream<List<TodoWithCategory>> todosInCategory(int? categoryId){
-  //
-  //   final query = select(todos).join([
-  //     leftOuterJoin(categories, categories.id.equalsExp(todos.cat))
-  //   ]);
-  //
-  //
-  // }
+  Stream<List<TodoWithCategory>> todosInCategory(int? categoryId) {
+    final query = select(todos).join([
+      leftOuterJoin(categories, categories.id.equalsExp(todos.category)),
+    ]);
+
+    if (categoryId != null) {
+      query.where(categories.id.equals(categoryId));
+    } else {
+      query.where(categories.id.isNull());
+    }
+
+    return query.map((row) {
+      return TodoWithCategory(
+        todo: row.readTable(todos),
+        category: row.readTableOrNull(categories),
+      );
+    }).watch();
+  }
 }
 
 class TodoWithCategory {
   final TodoEntry todo;
   final Category? category;
 
-  TodoWithCategory(this.todo, this.category);
+  TodoWithCategory({required this.todo, this.category});
 }
