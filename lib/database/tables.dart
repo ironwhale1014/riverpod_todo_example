@@ -10,6 +10,11 @@ mixin AutoPrimaryKey on Table {
 class Todos extends Table with AutoPrimaryKey {
   //schemaVersion 1
   TextColumn get description => text()();
+
+  //schemaVersion 2
+  DateTimeColumn get dueDate => dateTime().nullable()();
+
+  IntColumn get category => integer().nullable().references(Categories, #id)();
 }
 
 @DataClassName('Category')
