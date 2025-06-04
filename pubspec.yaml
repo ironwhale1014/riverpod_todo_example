@@ -38,6 +38,7 @@ dependencies:
   hooks_riverpod: ^3.0.0-dev.15
   flutter_hooks:
   riverpod_annotation: ^3.0.0-dev.15
+  drift: ^2.26.1
 
 dev_dependencies:
   flutter_test:
