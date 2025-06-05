@@ -43,9 +43,21 @@ class _HomePageState extends ConsumerState<HomePage> {
                   onTap: () {
                     ref
                         .read(repositoryProvider.notifier)
-                        .deleteTodos(todo: todos[index].todoEntry);
+                        .updateTodos(
+                          todo: todos[index].todoEntry.copyWith(
+                            description: "new description",
+                          ),
+                        );
                   },
                   title: Text(todos[index].todoEntry.description),
+                  trailing: IconButton(
+                    onPressed: () {
+                      ref
+                          .read(repositoryProvider.notifier)
+                          .deleteTodos(todo: todos[index].todoEntry);
+                    },
+                    icon: Icon(Icons.delete),
+                  ),
                 ),
               ),
               error: (_, _) => Text("error"),
