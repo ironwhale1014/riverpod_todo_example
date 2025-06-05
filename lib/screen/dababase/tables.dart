@@ -1,4 +1,5 @@
 import 'dart:ui';
+export 'dart:ui' show Color;
 
 import 'package:drift/drift.dart';
 
