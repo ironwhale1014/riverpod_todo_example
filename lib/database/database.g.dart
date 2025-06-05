@@ -276,8 +276,33 @@ class $TodosTable extends Todos with TableInfo<$TodosTable, TodoEntry> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _dueDateMeta = const VerificationMeta(
+    'dueDate',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, description];
+  late final GeneratedColumn<DateTime> dueDate = GeneratedColumn<DateTime>(
+    'due_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<int> category = GeneratedColumn<int>(
+    'category',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (id)',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, description, dueDate, category];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -304,6 +329,18 @@ class $TodosTable extends Todos with TableInfo<$TodosTable, TodoEntry> {
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
+    if (data.containsKey('due_date')) {
+      context.handle(
+        _dueDateMeta,
+        dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta),
+      );
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
     return context;
   }
 
@@ -321,6 +358,14 @@ class $TodosTable extends Todos with TableInfo<$TodosTable, TodoEntry> {
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       )!,
+      dueDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}due_date'],
+      ),
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}category'],
+      ),
     );
   }
 
@@ -333,17 +378,39 @@ class $TodosTable extends Todos with TableInfo<$TodosTable, TodoEntry> {
 class TodoEntry extends DataClass implements Insertable<TodoEntry> {
   final int id;
   final String description;
-  const TodoEntry({required this.id, required this.description});
+  final DateTime? dueDate;
+  final int? category;
+  const TodoEntry({
+    required this.id,
+    required this.description,
+    this.dueDate,
+    this.category,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['description'] = Variable<String>(description);
+    if (!nullToAbsent || dueDate != null) {
+      map['due_date'] = Variable<DateTime>(dueDate);
+    }
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<int>(category);
+    }
     return map;
   }
 
   TodosCompanion toCompanion(bool nullToAbsent) {
-    return TodosCompanion(id: Value(id), description: Value(description));
+    return TodosCompanion(
+      id: Value(id),
+      description: Value(description),
+      dueDate: dueDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dueDate),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
+    );
   }
 
   factory TodoEntry.fromJson(
@@ -354,6 +421,8 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
     return TodoEntry(
       id: serializer.fromJson<int>(json['id']),
       description: serializer.fromJson<String>(json['description']),
+      dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
+      category: serializer.fromJson<int?>(json['category']),
     );
   }
   @override
@@ -362,12 +431,21 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'description': serializer.toJson<String>(description),
+      'dueDate': serializer.toJson<DateTime?>(dueDate),
+      'category': serializer.toJson<int?>(category),
     };
   }
 
-  TodoEntry copyWith({int? id, String? description}) => TodoEntry(
+  TodoEntry copyWith({
+    int? id,
+    String? description,
+    Value<DateTime?> dueDate = const Value.absent(),
+    Value<int?> category = const Value.absent(),
+  }) => TodoEntry(
     id: id ?? this.id,
     description: description ?? this.description,
+    dueDate: dueDate.present ? dueDate.value : this.dueDate,
+    category: category.present ? category.value : this.category,
   );
   TodoEntry copyWithCompanion(TodosCompanion data) {
     return TodoEntry(
@@ -375,6 +453,8 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
       description: data.description.present
           ? data.description.value
           : this.description,
+      dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
+      category: data.category.present ? data.category.value : this.category,
     );
   }
 
@@ -382,46 +462,67 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
   String toString() {
     return (StringBuffer('TodoEntry(')
           ..write('id: $id, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('dueDate: $dueDate, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, description);
+  int get hashCode => Object.hash(id, description, dueDate, category);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TodoEntry &&
           other.id == this.id &&
-          other.description == this.description);
+          other.description == this.description &&
+          other.dueDate == this.dueDate &&
+          other.category == this.category);
 }
 
 class TodosCompanion extends UpdateCompanion<TodoEntry> {
   final Value<int> id;
   final Value<String> description;
+  final Value<DateTime?> dueDate;
+  final Value<int?> category;
   const TodosCompanion({
     this.id = const Value.absent(),
     this.description = const Value.absent(),
+    this.dueDate = const Value.absent(),
+    this.category = const Value.absent(),
   });
   TodosCompanion.insert({
     this.id = const Value.absent(),
     required String description,
+    this.dueDate = const Value.absent(),
+    this.category = const Value.absent(),
   }) : description = Value(description);
   static Insertable<TodoEntry> custom({
     Expression<int>? id,
     Expression<String>? description,
+    Expression<DateTime>? dueDate,
+    Expression<int>? category,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (description != null) 'description': description,
+      if (dueDate != null) 'due_date': dueDate,
+      if (category != null) 'category': category,
     });
   }
 
-  TodosCompanion copyWith({Value<int>? id, Value<String>? description}) {
+  TodosCompanion copyWith({
+    Value<int>? id,
+    Value<String>? description,
+    Value<DateTime?>? dueDate,
+    Value<int?>? category,
+  }) {
     return TodosCompanion(
       id: id ?? this.id,
       description: description ?? this.description,
+      dueDate: dueDate ?? this.dueDate,
+      category: category ?? this.category,
     );
   }
 
@@ -434,6 +535,12 @@ class TodosCompanion extends UpdateCompanion<TodoEntry> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
+    if (dueDate.present) {
+      map['due_date'] = Variable<DateTime>(dueDate.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<int>(category.value);
+    }
     return map;
   }
 
@@ -441,7 +548,9 @@ class TodosCompanion extends UpdateCompanion<TodoEntry> {
   String toString() {
     return (StringBuffer('TodosCompanion(')
           ..write('id: $id, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('dueDate: $dueDate, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
@@ -472,6 +581,30 @@ typedef $$CategoriesTableUpdateCompanionBuilder =
       Value<Color> color,
     });
 
+final class $$CategoriesTableReferences
+    extends BaseReferences<_$AppDatabase, $CategoriesTable, Category> {
+  $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$TodosTable, List<TodoEntry>> _todosRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.todos,
+    aliasName: $_aliasNameGenerator(db.categories.id, db.todos.category),
+  );
+
+  $$TodosTableProcessedTableManager get todosRefs {
+    final manager = $$TodosTableTableManager(
+      $_db,
+      $_db.todos,
+    ).filter((f) => f.category.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_todosRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
 class $$CategoriesTableFilterComposer
     extends Composer<_$AppDatabase, $CategoriesTable> {
   $$CategoriesTableFilterComposer({
@@ -496,6 +629,31 @@ class $$CategoriesTableFilterComposer
         column: $table.color,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
+
+  Expression<bool> todosRefs(
+    Expression<bool> Function($$TodosTableFilterComposer f) f,
+  ) {
+    final $$TodosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.todos,
+      getReferencedColumn: (t) => t.category,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TodosTableFilterComposer(
+            $db: $db,
+            $table: $db.todos,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableOrderingComposer
@@ -540,6 +698,31 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<Color, int> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
+
+  Expression<T> todosRefs<T extends Object>(
+    Expression<T> Function($$TodosTableAnnotationComposer a) f,
+  ) {
+    final $$TodosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.todos,
+      getReferencedColumn: (t) => t.category,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TodosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.todos,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableTableManager
@@ -553,9 +736,9 @@ class $$CategoriesTableTableManager
           $$CategoriesTableAnnotationComposer,
           $$CategoriesTableCreateCompanionBuilder,
           $$CategoriesTableUpdateCompanionBuilder,
-          (Category, BaseReferences<_$AppDatabase, $CategoriesTable, Category>),
+          (Category, $$CategoriesTableReferences),
           Category,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool todosRefs})
         > {
   $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
     : super(
@@ -582,9 +765,39 @@ class $$CategoriesTableTableManager
               }) =>
                   CategoriesCompanion.insert(id: id, name: name, color: color),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CategoriesTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({todosRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (todosRefs) db.todos],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (todosRefs)
+                    await $_getPrefetchedData<
+                      Category,
+                      $CategoriesTable,
+                      TodoEntry
+                    >(
+                      currentTable: table,
+                      referencedTable: $$CategoriesTableReferences
+                          ._todosRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$CategoriesTableReferences(db, table, p0).todosRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.category == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -599,14 +812,46 @@ typedef $$CategoriesTableProcessedTableManager =
       $$CategoriesTableAnnotationComposer,
       $$CategoriesTableCreateCompanionBuilder,
       $$CategoriesTableUpdateCompanionBuilder,
-      (Category, BaseReferences<_$AppDatabase, $CategoriesTable, Category>),
+      (Category, $$CategoriesTableReferences),
       Category,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool todosRefs})
     >;
 typedef $$TodosTableCreateCompanionBuilder =
-    TodosCompanion Function({Value<int> id, required String description});
+    TodosCompanion Function({
+      Value<int> id,
+      required String description,
+      Value<DateTime?> dueDate,
+      Value<int?> category,
+    });
 typedef $$TodosTableUpdateCompanionBuilder =
-    TodosCompanion Function({Value<int> id, Value<String> description});
+    TodosCompanion Function({
+      Value<int> id,
+      Value<String> description,
+      Value<DateTime?> dueDate,
+      Value<int?> category,
+    });
+
+final class $$TodosTableReferences
+    extends BaseReferences<_$AppDatabase, $TodosTable, TodoEntry> {
+  $$TodosTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CategoriesTable _categoryTable(_$AppDatabase db) => db.categories
+      .createAlias($_aliasNameGenerator(db.todos.category, db.categories.id));
+
+  $$CategoriesTableProcessedTableManager? get category {
+    final $_column = $_itemColumn<int>('category');
+    if ($_column == null) return null;
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
 
 class $$TodosTableFilterComposer extends Composer<_$AppDatabase, $TodosTable> {
   $$TodosTableFilterComposer({
@@ -625,6 +870,34 @@ class $$TodosTableFilterComposer extends Composer<_$AppDatabase, $TodosTable> {
     column: $table.description,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CategoriesTableFilterComposer get category {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$TodosTableOrderingComposer
@@ -645,6 +918,34 @@ class $$TodosTableOrderingComposer
     column: $table.description,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CategoriesTableOrderingComposer get category {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$TodosTableAnnotationComposer
@@ -663,6 +964,32 @@ class $$TodosTableAnnotationComposer
     column: $table.description,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get dueDate =>
+      $composableBuilder(column: $table.dueDate, builder: (column) => column);
+
+  $$CategoriesTableAnnotationComposer get category {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$TodosTableTableManager
@@ -676,9 +1003,9 @@ class $$TodosTableTableManager
           $$TodosTableAnnotationComposer,
           $$TodosTableCreateCompanionBuilder,
           $$TodosTableUpdateCompanionBuilder,
-          (TodoEntry, BaseReferences<_$AppDatabase, $TodosTable, TodoEntry>),
+          (TodoEntry, $$TodosTableReferences),
           TodoEntry,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool category})
         > {
   $$TodosTableTableManager(_$AppDatabase db, $TodosTable table)
     : super(
@@ -695,16 +1022,73 @@ class $$TodosTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> description = const Value.absent(),
-              }) => TodosCompanion(id: id, description: description),
+                Value<DateTime?> dueDate = const Value.absent(),
+                Value<int?> category = const Value.absent(),
+              }) => TodosCompanion(
+                id: id,
+                description: description,
+                dueDate: dueDate,
+                category: category,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String description,
-              }) => TodosCompanion.insert(id: id, description: description),
+                Value<DateTime?> dueDate = const Value.absent(),
+                Value<int?> category = const Value.absent(),
+              }) => TodosCompanion.insert(
+                id: id,
+                description: description,
+                dueDate: dueDate,
+                category: category,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) =>
+                    (e.readTable(table), $$TodosTableReferences(db, table, e)),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({category = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (category) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.category,
+                                referencedTable: $$TodosTableReferences
+                                    ._categoryTable(db),
+                                referencedColumn: $$TodosTableReferences
+                                    ._categoryTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -719,9 +1103,9 @@ typedef $$TodosTableProcessedTableManager =
       $$TodosTableAnnotationComposer,
       $$TodosTableCreateCompanionBuilder,
       $$TodosTableUpdateCompanionBuilder,
-      (TodoEntry, BaseReferences<_$AppDatabase, $TodosTable, TodoEntry>),
+      (TodoEntry, $$TodosTableReferences),
       TodoEntry,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool category})
     >;
 
 class $AppDatabaseManager {

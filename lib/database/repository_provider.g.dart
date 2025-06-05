@@ -6,32 +6,31 @@ part of 'repository_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-@ProviderFor(RepositoryProvider)
-const repositoryProviderProvider = RepositoryProviderProvider._();
+@ProviderFor(Repository)
+const repositoryProvider = RepositoryProvider._();
 
-final class RepositoryProviderProvider
-    extends $NotifierProvider<RepositoryProvider, void> {
-  const RepositoryProviderProvider._()
+final class RepositoryProvider extends $NotifierProvider<Repository, void> {
+  const RepositoryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'repositoryProviderProvider',
+        name: r'repositoryProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$repositoryProviderHash();
+  String debugGetCreateSourceHash() => _$repositoryHash();
 
   @$internal
   @override
-  RepositoryProvider create() => RepositoryProvider();
+  Repository create() => Repository();
 
   @$internal
   @override
-  $NotifierProviderElement<RepositoryProvider, void> $createElement(
+  $NotifierProviderElement<Repository, void> $createElement(
     $ProviderPointer pointer,
   ) => $NotifierProviderElement(pointer);
 
@@ -44,10 +43,9 @@ final class RepositoryProviderProvider
   }
 }
 
-String _$repositoryProviderHash() =>
-    r'ba16e4a78edefc24bcaeccbb375c26b278f6c010';
+String _$repositoryHash() => r'd50d720a862be21697d701f2eca6f41af349ab5d';
 
-abstract class _$RepositoryProvider extends $Notifier<void> {
+abstract class _$Repository extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override

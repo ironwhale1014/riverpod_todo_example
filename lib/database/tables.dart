@@ -10,6 +10,11 @@ mixin AutoIncrementPrimaryKey on Table {
 @DataClassName('TodoEntry')
 class Todos extends Table with AutoIncrementPrimaryKey {
   TextColumn get description => text()();
+
+  DateTimeColumn get dueDate => dateTime().nullable()();
+
+  IntColumn get category =>
+      integer().nullable().references(Categories, #id)();
 }
 
 @DataClassName('Category')
