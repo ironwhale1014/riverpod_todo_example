@@ -39,8 +39,13 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: todos.when(
               data: (todos) => ListView.builder(
                 itemCount: todos.length,
-                itemBuilder: (context,index)=>ListTile(
-                  title:Text(todos[index].todoEntry.description)
+                itemBuilder: (context, index) => ListTile(
+                  onTap: () {
+                    ref
+                        .read(repositoryProvider.notifier)
+                        .deleteTodos(todo: todos[index].todoEntry);
+                  },
+                  title: Text(todos[index].todoEntry.description),
                 ),
               ),
               error: (_, _) => Text("error"),
