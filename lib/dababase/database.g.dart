@@ -732,3 +732,69 @@ class $AppDatabaseManager {
   $$TodosTableTableManager get todos =>
       $$TodosTableTableManager(_db, _db.todos);
 }
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+@ProviderFor(DatabaseState)
+const databaseStateProvider = DatabaseStateProvider._();
+
+final class DatabaseStateProvider
+    extends $NotifierProvider<DatabaseState, AppDatabase> {
+  const DatabaseStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'databaseStateProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$databaseStateHash();
+
+  @$internal
+  @override
+  DatabaseState create() => DatabaseState();
+
+  @$internal
+  @override
+  $NotifierProviderElement<DatabaseState, AppDatabase> $createElement(
+    $ProviderPointer pointer,
+  ) => $NotifierProviderElement(pointer);
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AppDatabase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $ValueProvider<AppDatabase>(value),
+    );
+  }
+}
+
+String _$databaseStateHash() => r'a2beff308593bade775704db933f8cd445ec3ea0';
+
+abstract class _$DatabaseState extends $Notifier<AppDatabase> {
+  AppDatabase build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<AppDatabase>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AppDatabase>,
+              AppDatabase,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
+// ignore_for_file: type=lint
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
