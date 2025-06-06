@@ -32,7 +32,9 @@ class HomePage extends HookConsumerWidget {
               child: todos.when(
                 data: (todos) => ListView.builder(
                   itemCount: todos.length,
-                  itemBuilder: (context, index) => TodoCard(todo: todos[index]),
+                  itemBuilder: (context, index) => ProviderScope(
+                      overrides: [currentTodo.overrideWithValue(todos[index])],
+                      child: const TodoCard()),
                 ),
                 error: (_, _) => Text("error"),
                 loading: () {
@@ -49,3 +51,8 @@ class HomePage extends HookConsumerWidget {
     );
   }
 }
+
+final currentTodo = Provider<TodoWithCategory>(
+  (ref) => throw UnimplementedError(),
+  dependencies: [],
+);
