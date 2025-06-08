@@ -5,6 +5,8 @@ import 'package:drift_todo_train/database/database.steps.dart';
 import 'package:drift_todo_train/database/tables.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../model/todo_with_category.dart';
+
 part 'database.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -36,36 +38,9 @@ class AppDatabase extends _$AppDatabase {
         from1To2: (m, schema) async {
           await m.addColumn(schema.todos, schema.todos.dueDate);
           await m.addColumn(schema.todos, schema.todos.category);
-
           await m.alterTable(TableMigration(schema.todos));
         },
       ),
     );
   }
-
-  Stream<List<TodoWithCategory>> todosInCategory(int? categoryId) {
-    final query = select(todos).join([
-      leftOuterJoin(categories, categories.id.equalsExp(todos.category)),
-    ]);
-
-    if (categoryId != null) {
-      query.where(categories.id.equals(categoryId));
-    } else {
-      query.where(categories.id.isNull());
-    }
-
-    return query.map((row) {
-      return TodoWithCategory(
-        todo: row.readTable(todos),
-        category: row.readTableOrNull(categories),
-      );
-    }).watch();
-  }
-}
-
-class TodoWithCategory {
-  final TodoEntry todo;
-  final Category? category;
-
-  TodoWithCategory({required this.todo, this.category});
 }

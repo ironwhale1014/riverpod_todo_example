@@ -1,6 +1,5 @@
-import 'package:drift/drift.dart' hide Column;
-import 'package:drift_todo_train/common/util/logger.dart';
-import 'package:drift_todo_train/database/database.dart';
+import 'package:drift_todo_train/service/service.dart';
+import 'package:drift_todo_train/service/todo_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -22,7 +21,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final todos = ref.watch(databaseStateProvider).todosInCategory(null);
+    final todos = ref.watch(todoWithCategoryProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Home Page')),
@@ -31,37 +30,28 @@ class _HomePageState extends ConsumerState<HomePage> {
           TextFormField(
             controller: todoController,
             onFieldSubmitted: (value) {
-              logger.d(value);
-
               ref
-                  .read(databaseStateProvider)
-                  .todos
-                  .insertOne(
-                    TodosCompanion.insert(description: todoController.text),
-                  );
-
+                  .read(todoServiceProvider.notifier)
+                  .saveTodo(description: todoController.text);
               todoController.clear();
             },
           ),
           Expanded(
-            child: StreamBuilder(
-              stream: todos,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final datas = snapshot.data!;
-
-                  return ListView.builder(
-                    itemCount: datas.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(datas[index].todo.description),
-                        leading: Text(datas[index].category?.name ?? '기본'),
-                      );
-                    },
+            child: todos.when(
+              data: (todos) => ListView.builder(
+                itemCount: todos.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(todos[index].todoEntry.description),
+                    leading: Text(todos[index].category?.name ?? '기본'),
                   );
-                }
-                return Center(child: const CircularProgressIndicator());
-              },
+                },
+              ),
+              error: (_, _) => Text("error"),
+              loading: () => Align(
+                alignment: Alignment.center,
+                child: const CircularProgressIndicator(),
+              ),
             ),
           ),
         ],
