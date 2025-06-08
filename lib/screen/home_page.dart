@@ -19,6 +19,18 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.dispose();
   }
 
+  void _addTodos() {
+    if (todoController.text.isNotEmpty) {
+      final category = ref.read(categoryStateProvider);
+
+      ref
+          .read(todoServiceProvider.notifier)
+          .saveTodo(description: todoController.text, categoryId: category?.id);
+
+      todoController.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final todos = ref.watch(todoWithCategoryProvider);
@@ -27,14 +39,16 @@ class _HomePageState extends ConsumerState<HomePage> {
       appBar: AppBar(title: const Text('Home Page')),
       body: Column(
         children: [
-          TextFormField(
-            controller: todoController,
-            onFieldSubmitted: (value) {
-              ref
-                  .read(todoServiceProvider.notifier)
-                  .saveTodo(description: todoController.text);
-              todoController.clear();
-            },
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: todoController,
+                  onFieldSubmitted: (value) => _addTodos(),
+                ),
+              ),
+              IconButton(onPressed: _addTodos, icon: Icon(Icons.save)),
+            ],
           ),
           Expanded(
             child: todos.when(
