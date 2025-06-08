@@ -42,6 +42,7 @@ dependencies:
   drift_flutter: ^0.2.4
   path_provider: ^2.1.5
   path: ^1.9.1
+  intl:
   logger:
 
 dev_dependencies:

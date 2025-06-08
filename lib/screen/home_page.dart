@@ -1,3 +1,5 @@
+import 'package:drift_todo_train/model/todo_with_category.dart';
+import 'package:drift_todo_train/screen/components/todo_card.dart';
 import 'package:drift_todo_train/service/service.dart';
 import 'package:drift_todo_train/service/todo_state_provider.dart';
 import 'package:flutter/material.dart';
@@ -55,9 +57,9 @@ class _HomePageState extends ConsumerState<HomePage> {
               data: (todos) => ListView.builder(
                 itemCount: todos.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(todos[index].todoEntry.description),
-                    leading: Text(todos[index].category?.name ?? '기본'),
+                  return ProviderScope(
+                    overrides: [currentTodo.overrideWithValue(todos[index])],
+                    child: TodoCard(),
                   );
                 },
               ),
@@ -73,3 +75,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 }
+
+final currentTodo = Provider<TodoWithCategory>(
+  (ref) => throw UnimplementedError(),
+  dependencies: [],
+);
