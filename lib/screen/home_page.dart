@@ -1,3 +1,5 @@
+import 'package:drift_todo_train/database/database.dart';
+import 'package:drift_todo_train/screen/component/todo_card.dart';
 import 'package:drift_todo_train/service/service.dart';
 import 'package:drift_todo_train/service/todo_with_category_provider.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +51,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                   itemCount: todos.length,
                   itemBuilder: (BuildContext context, int index) {
                     final todo = todos[index].todoEntry;
-                    return ListTile(title: Text(todo.description));
+                    return ProviderScope(
+                      overrides: [currentTodo.overrideWithValue(todo)],
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: const TodoCard(),
+                      ),
+                    );
                   },
                 );
               },
@@ -62,3 +70,5 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 }
+
+final currentTodo = Provider<TodoEntry>((ref) => throw UnimplementedError());
