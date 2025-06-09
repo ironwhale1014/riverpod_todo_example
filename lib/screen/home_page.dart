@@ -13,6 +13,17 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   final _controller = TextEditingController();
 
+  void _addTodos() async {
+    if (_controller.text.isNotEmpty) {
+      final category = ref.read(categoryStateProvider);
+
+      await ref
+          .read(todoServiceProvider.notifier)
+          .saveTodo(description: _controller.text, category: category?.id);
+      _controller.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final todos = ref.watch(todoWithCategoryProvider);
@@ -20,14 +31,16 @@ class _HomePageState extends ConsumerState<HomePage> {
       appBar: AppBar(title: Text('home')),
       body: Column(
         children: [
-          TextFormField(
-            controller: _controller,
-            onFieldSubmitted: (_) async {
-              await ref
-                  .read(todoServiceProvider.notifier)
-                  .saveTodo(description: _controller.text);
-              _controller.clear();
-            },
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _controller,
+                  onFieldSubmitted: (_) => _addTodos(),
+                ),
+              ),
+              TextButton(onPressed: _addTodos, child: Text("save")),
+            ],
           ),
           Expanded(
             child: todos.when(

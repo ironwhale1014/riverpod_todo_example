@@ -15,9 +15,12 @@ class TodoService extends _$TodoService {
     return;
   }
 
-  Future<void> saveTodo({required String description}) async {
+  Future<void> saveTodo({required String description, int? category}) async {
     await appDatabase.todoEntries.insertOne(
-      TodoEntriesCompanion.insert(description: description),
+      TodoEntriesCompanion.insert(
+        description: description,
+        category: Value(category),
+      ),
     );
   }
 
