@@ -1,7 +1,11 @@
+import 'package:drift_todo_train/screen/components/todo_edit_dialog.dart';
 import 'package:drift_todo_train/screen/home_page.dart';
 import 'package:drift_todo_train/service/service.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
+
+final _formattedDate = DateFormat.yMMMd();
 
 class TodoCard extends ConsumerWidget {
   const TodoCard({super.key});
@@ -22,7 +26,7 @@ class TodoCard extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(todo.todoEntry.description),
-                  if (dueDate != null) Text(dueDate.toString()),
+                  if (dueDate != null) Text(_formattedDate.format(dueDate)),
                   if (dueDate == null)
                     Text(
                       'No due date set',
@@ -31,7 +35,17 @@ class TodoCard extends ConsumerWidget {
                 ],
               ),
             ),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.edit)),
+            IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return TodoEditDialog(todoEntry: todo.todoEntry);
+                  },
+                );
+              },
+              icon: const Icon(Icons.edit),
+            ),
             IconButton(
               color: Colors.red,
               onPressed: () {
