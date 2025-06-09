@@ -5,6 +5,9 @@ import 'package:drift_todo_train/service/todo_with_category_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../common/logger.dart';
+import '../model/todo_with_category.dart';
+
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
@@ -23,6 +26,17 @@ class _HomePageState extends ConsumerState<HomePage> {
           .read(todoServiceProvider.notifier)
           .saveTodo(description: _controller.text, category: category?.id);
       _controller.clear();
+    }
+    if (_controller.text.isEmpty) {
+      List<TodoWithCategory> list = await ref
+          .read(todoServiceProvider.notifier)
+          .search('fix');
+      if(list.isEmpty){
+        logger.d('list is empty');
+      }
+      for (TodoWithCategory o in list) {
+        logger.d(o.todoEntry.description);
+      }
     }
   }
 

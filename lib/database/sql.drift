@@ -1,0 +1,22 @@
+import 'tables.dart';
+
+CREATE VIRTUAL TABLE text_entries USING fts5 (
+    description,
+    content=todo_entries,
+    content_rowid=id
+);
+
+
+-- Triggers to keep todo entries and fts5 index in sync.
+CREATE TRIGGER todos_insert AFTER INSERT ON todo_entries BEGIN
+  INSERT INTO text_entries(rowid, description) VALUES (new.id, new.description);
+END;
+
+
+
+
+search: SELECT todos.**, cat.** FROM text_entries
+    INNER JOIN todo_entries todos ON todos.id = text_entries.rowid
+    LEFT OUTER JOIN categories cat ON cat.id = todos.category
+    WHERE text_entries MATCH :query || '*'
+    ORDER BY rank;

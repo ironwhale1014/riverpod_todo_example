@@ -58,4 +58,11 @@ class TodoService extends _$TodoService {
         )
         .watch();
   }
+
+  Future<List<TodoWithCategory>> search(String text) async {
+    return appDatabase
+        .search(text)
+        .map((row) => TodoWithCategory(todoEntry: row.todos, category: row.cat))
+        .get();
+  }
 }
