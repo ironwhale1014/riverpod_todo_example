@@ -1,4 +1,5 @@
 import 'package:drift_todo_train/service/service.dart';
+import 'package:drift_todo_train/service/todo_with_category_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -14,7 +15,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final todos = ref.watch(todoServiceProvider.notifier).getTodoEntryStream();
+    final todos = ref.watch(todoWithCategoryProvider);
     return Scaffold(
       appBar: AppBar(title: Text('home')),
       body: Column(
@@ -29,31 +30,18 @@ class _HomePageState extends ConsumerState<HomePage> {
             },
           ),
           Expanded(
-            child: StreamBuilder(
-              stream: todos,
-              builder: (ctx, snapshot) {
-                if (snapshot.hasData) {
-                  final todos = snapshot.data!;
-                  return ListView.builder(
-                    itemCount: todos.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return ListTile(
-                        title: Text(todos[index].description),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            ref
-                                .read(todoServiceProvider.notifier)
-                                .deleteTodo(todo: todos[index]);
-                          },
-                        ),
-                      );
-                    },
-                  );
-                }
-
-                return Center(child: CircularProgressIndicator());
+            child: todos.when(
+              data: (todos) {
+                return ListView.builder(
+                  itemCount: todos.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final todo = todos[index].todoEntry;
+                    return ListTile(title: Text(todo.description));
+                  },
+                );
               },
+              error: (_, _) => Text("Error"),
+              loading: () => Center(child: CircularProgressIndicator()),
             ),
           ),
         ],
