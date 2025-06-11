@@ -4,3 +4,18 @@ CREATE VIRTUAL TABLE test_entries USING fts5(
   description,
   content=todos,
   content_rowid = id);
+
+CREATE TRIGGER todo_insert AFTER INSERT ON todos BEGIN
+  INSERT INTO test_entries(rowid, description) VALUES(new.id, new.description);
+END;
+
+CREATE TRIGGER todo_update AFTER UPDATE ON todos BEGIN
+  INSERT INTO test_entries(test_entries, rowid, description) VALUES('delete',old.id, old.description);
+  INSERT INTO test_entries(rowid, description) VALUES(new.id, new.description);
+END;
+
+CREATE TRIGGER todo_delete AFTER DELETE ON todos BEGIN
+  INSERT INTO test_entries(test_entries, rowid, description) VALUES('delete',old.id, old.description);
+END;
+
+

@@ -35,7 +35,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -53,6 +53,13 @@ class AppDatabase extends _$AppDatabase {
             'INSERT INTO test_entries(rowid, description) SELECT id, description FROM todos;',
           );
           logger.d('from2To3 end');
+        },
+        from3To4: (Migrator m, Schema4 schema) async {
+          logger.d('from3To4');
+          await m.create(schema.todoDelete);
+          await m.create(schema.todoInsert);
+          await m.create(schema.todoUpdate);
+          logger.d('from3To4 end');
         },
       ),
     );

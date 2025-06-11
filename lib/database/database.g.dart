@@ -744,6 +744,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $TodosTable todos = $TodosTable(this);
   late final TestEntries testEntries = TestEntries(this);
+  late final Trigger todoInsert = Trigger(
+    'CREATE TRIGGER todo_insert AFTER INSERT ON todos BEGIN INSERT INTO test_entries ("rowid", description) VALUES (new.id, new.description);END',
+    'todo_insert',
+  );
+  late final Trigger todoUpdate = Trigger(
+    'CREATE TRIGGER todo_update AFTER UPDATE ON todos BEGIN INSERT INTO test_entries (test_entries, "rowid", description) VALUES (\'delete\', old.id, old.description);INSERT INTO test_entries ("rowid", description) VALUES (new.id, new.description);END',
+    'todo_update',
+  );
+  late final Trigger todoDelete = Trigger(
+    'CREATE TRIGGER todo_delete AFTER DELETE ON todos BEGIN INSERT INTO test_entries (test_entries, "rowid", description) VALUES (\'delete\', old.id, old.description);END',
+    'todo_delete',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -752,7 +764,34 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     categories,
     todos,
     testEntries,
+    todoInsert,
+    todoUpdate,
+    todoDelete,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'todos',
+        limitUpdateKind: UpdateKind.insert,
+      ),
+      result: [TableUpdate('test_entries', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'todos',
+        limitUpdateKind: UpdateKind.update,
+      ),
+      result: [TableUpdate('test_entries', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'todos',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('test_entries', kind: UpdateKind.insert)],
+    ),
+  ]);
 }
 
 typedef $$CategoriesTableCreateCompanionBuilder =

@@ -183,9 +183,67 @@ i1.GeneratedColumn<String> _column_7(String aliasedName) =>
       type: i1.DriftSqlType.string,
       $customConstraints: '',
     );
+
+final class Schema4 extends i0.VersionedSchema {
+  Schema4({required super.database}) : super(version: 4);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    categories,
+    todos,
+    testEntries,
+    todoInsert,
+    todoUpdate,
+    todoDelete,
+  ];
+  late final Shape0 categories = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'categories',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 todos = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'todos',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_3, _column_4, _column_6],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 testEntries = Shape3(
+    source: i0.VersionedVirtualTable(
+      entityName: 'test_entries',
+      moduleAndArgs: 'fts5(description, content=todos, content_rowid = id)',
+      columns: [_column_7],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger todoInsert = i1.Trigger(
+    'CREATE TRIGGER todo_insert AFTER INSERT ON todos BEGIN INSERT INTO test_entries ("rowid", description) VALUES (new.id, new.description);END',
+    'todo_insert',
+  );
+  final i1.Trigger todoUpdate = i1.Trigger(
+    'CREATE TRIGGER todo_update AFTER UPDATE ON todos BEGIN INSERT INTO test_entries (test_entries, "rowid", description) VALUES (\'delete\', old.id, old.description);INSERT INTO test_entries ("rowid", description) VALUES (new.id, new.description);END',
+    'todo_update',
+  );
+  final i1.Trigger todoDelete = i1.Trigger(
+    'CREATE TRIGGER todo_delete AFTER DELETE ON todos BEGIN INSERT INTO test_entries (test_entries, "rowid", description) VALUES (\'delete\', old.id, old.description);END',
+    'todo_delete',
+  );
+}
+
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -199,6 +257,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from2To3(migrator, schema);
         return 3;
+      case 3:
+        final schema = Schema4(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from3To4(migrator, schema);
+        return 4;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -208,6 +271,11 @@ i0.MigrationStepWithVersion migrationSteps({
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
 }) => i0.VersionedSchema.stepByStepHelper(
-  step: migrationSteps(from1To2: from1To2, from2To3: from2To3),
+  step: migrationSteps(
+    from1To2: from1To2,
+    from2To3: from2To3,
+    from3To4: from3To4,
+  ),
 );
