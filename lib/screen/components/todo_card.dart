@@ -1,8 +1,11 @@
+import 'package:drift_todo_train/common/date_format.dart';
 import 'package:drift_todo_train/database/repository_provider.dart';
 import 'package:drift_todo_train/screen/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import 'edit_dialog.dart';
 
 class TodoCard extends HookConsumerWidget {
   const TodoCard({super.key});
@@ -33,6 +36,11 @@ class TodoCard extends HookConsumerWidget {
           tileFocus.requestFocus();
           textFieldFocus.requestFocus();
         },
+        subtitle: Text(
+          todo.todoEntry.dueDate == null
+              ? 'not set due date'
+              : dateFormat.format(todo.todoEntry.dueDate!).toString(),
+        ),
         title: (isFocused)
             ? TextField(
                 controller: editController,
@@ -40,13 +48,29 @@ class TodoCard extends HookConsumerWidget {
                 autofocus: true,
               )
             : Text(todo.todoEntry.description),
-        trailing: IconButton(
-          onPressed: () {
-            ref
-                .read(repositoryProvider.notifier)
-                .deleteTodos(todo: todo.todoEntry);
-          },
-          icon: Icon(Icons.delete),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              color: Colors.grey,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => EditDialog(todoEntry: todo.todoEntry),
+                );
+              },
+              icon: Icon(Icons.edit),
+            ),
+            IconButton(
+              color: Colors.red,
+              onPressed: () {
+                ref
+                    .read(repositoryProvider.notifier)
+                    .deleteTodos(todo: todo.todoEntry);
+              },
+              icon: Icon(Icons.delete),
+            ),
+          ],
         ),
       ),
     );
