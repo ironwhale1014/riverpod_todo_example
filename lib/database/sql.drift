@@ -1,0 +1,6 @@
+import 'tables.dart';
+
+CREATE VIRTUAL TABLE test_entries USING fts5(
+  description,
+  content=todos,
+  content_rowid = id);

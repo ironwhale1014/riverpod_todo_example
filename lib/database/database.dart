@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:drift_todo_train/common/logger.dart';
 import 'package:drift_todo_train/database/database.steps.dart';
 import 'package:drift_todo_train/database/tables.dart';
 import 'package:path/path.dart' as p;
@@ -23,7 +24,7 @@ class DatabaseState extends _$DatabaseState {
   }
 }
 
-@DriftDatabase(tables: [Categories, Todos])
+@DriftDatabase(tables: [Categories, Todos], include: {'sql.drift'})
 class AppDatabase extends _$AppDatabase {
   AppDatabase()
     : super(
@@ -34,7 +35,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -43,6 +44,15 @@ class AppDatabase extends _$AppDatabase {
         from1To2: (m, schema) async {
           await m.addColumn(schema.todos, schema.todos.dueDate);
           await m.alterTable(TableMigration(schema.todos));
+        },
+        from2To3: (Migrator m, Schema3 schema) async {
+          logger.d('from2To3');
+          await m.createTable(schema.testEntries);
+          logger.d("test_entries created");
+          await customStatement(
+            'INSERT INTO test_entries(rowid, description) SELECT id, description FROM todos;',
+          );
+          logger.d('from2To3 end');
         },
       ),
     );

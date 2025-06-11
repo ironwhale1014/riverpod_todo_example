@@ -556,16 +556,203 @@ class TodosCompanion extends UpdateCompanion<TodoEntry> {
   }
 }
 
+class TestEntries extends Table
+    with
+        TableInfo<TestEntries, TestEntry>,
+        VirtualTableInfo<TestEntries, TestEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  TestEntries(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: '',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [description];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'test_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TestEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  TestEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TestEntry(
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+    );
+  }
+
+  @override
+  TestEntries createAlias(String alias) {
+    return TestEntries(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+  @override
+  String get moduleAndArgs =>
+      'fts5(description, content=todos, content_rowid = id)';
+}
+
+class TestEntry extends DataClass implements Insertable<TestEntry> {
+  final String description;
+  const TestEntry({required this.description});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['description'] = Variable<String>(description);
+    return map;
+  }
+
+  TestEntriesCompanion toCompanion(bool nullToAbsent) {
+    return TestEntriesCompanion(description: Value(description));
+  }
+
+  factory TestEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TestEntry(
+      description: serializer.fromJson<String>(json['description']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'description': serializer.toJson<String>(description),
+    };
+  }
+
+  TestEntry copyWith({String? description}) =>
+      TestEntry(description: description ?? this.description);
+  TestEntry copyWithCompanion(TestEntriesCompanion data) {
+    return TestEntry(
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TestEntry(')
+          ..write('description: $description')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => description.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TestEntry && other.description == this.description);
+}
+
+class TestEntriesCompanion extends UpdateCompanion<TestEntry> {
+  final Value<String> description;
+  final Value<int> rowid;
+  const TestEntriesCompanion({
+    this.description = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TestEntriesCompanion.insert({
+    required String description,
+    this.rowid = const Value.absent(),
+  }) : description = Value(description);
+  static Insertable<TestEntry> custom({
+    Expression<String>? description,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (description != null) 'description': description,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TestEntriesCompanion copyWith({
+    Value<String>? description,
+    Value<int>? rowid,
+  }) {
+    return TestEntriesCompanion(
+      description: description ?? this.description,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TestEntriesCompanion(')
+          ..write('description: $description, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $TodosTable todos = $TodosTable(this);
+  late final TestEntries testEntries = TestEntries(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [categories, todos];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    categories,
+    todos,
+    testEntries,
+  ];
 }
 
 typedef $$CategoriesTableCreateCompanionBuilder =
@@ -1107,6 +1294,123 @@ typedef $$TodosTableProcessedTableManager =
       TodoEntry,
       PrefetchHooks Function({bool category})
     >;
+typedef $TestEntriesCreateCompanionBuilder =
+    TestEntriesCompanion Function({
+      required String description,
+      Value<int> rowid,
+    });
+typedef $TestEntriesUpdateCompanionBuilder =
+    TestEntriesCompanion Function({
+      Value<String> description,
+      Value<int> rowid,
+    });
+
+class $TestEntriesFilterComposer extends Composer<_$AppDatabase, TestEntries> {
+  $TestEntriesFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $TestEntriesOrderingComposer
+    extends Composer<_$AppDatabase, TestEntries> {
+  $TestEntriesOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $TestEntriesAnnotationComposer
+    extends Composer<_$AppDatabase, TestEntries> {
+  $TestEntriesAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+}
+
+class $TestEntriesTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          TestEntries,
+          TestEntry,
+          $TestEntriesFilterComposer,
+          $TestEntriesOrderingComposer,
+          $TestEntriesAnnotationComposer,
+          $TestEntriesCreateCompanionBuilder,
+          $TestEntriesUpdateCompanionBuilder,
+          (TestEntry, BaseReferences<_$AppDatabase, TestEntries, TestEntry>),
+          TestEntry,
+          PrefetchHooks Function()
+        > {
+  $TestEntriesTableManager(_$AppDatabase db, TestEntries table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $TestEntriesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $TestEntriesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $TestEntriesAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> description = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) =>
+                  TestEntriesCompanion(description: description, rowid: rowid),
+          createCompanionCallback:
+              ({
+                required String description,
+                Value<int> rowid = const Value.absent(),
+              }) => TestEntriesCompanion.insert(
+                description: description,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $TestEntriesProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      TestEntries,
+      TestEntry,
+      $TestEntriesFilterComposer,
+      $TestEntriesOrderingComposer,
+      $TestEntriesAnnotationComposer,
+      $TestEntriesCreateCompanionBuilder,
+      $TestEntriesUpdateCompanionBuilder,
+      (TestEntry, BaseReferences<_$AppDatabase, TestEntries, TestEntry>),
+      TestEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1115,6 +1419,8 @@ class $AppDatabaseManager {
       $$CategoriesTableTableManager(_db, _db.categories);
   $$TodosTableTableManager get todos =>
       $$TodosTableTableManager(_db, _db.todos);
+  $TestEntriesTableManager get testEntries =>
+      $TestEntriesTableManager(_db, _db.testEntries);
 }
 
 // **************************************************************************
