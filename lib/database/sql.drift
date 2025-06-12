@@ -19,3 +19,8 @@ CREATE TRIGGER todo_delete AFTER DELETE ON todos BEGIN
 END;
 
 
+search: SELECT todo.**, cat.** FROM test_entries
+            INNER JOIN todos todo ON todo.id = test_entries.rowid
+            LEFT OUTER JOIN categories cat ON cat.id = todo.category
+            WHERE test_entries MATCH :query
+            ORDER BY rank;

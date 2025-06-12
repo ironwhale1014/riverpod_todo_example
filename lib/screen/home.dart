@@ -1,8 +1,10 @@
+import 'package:drift_todo_train/common/logger.dart';
 import 'package:drift_todo_train/database/repository_provider.dart';
 import 'package:drift_todo_train/database/state.dart';
 import 'package:drift_todo_train/screen/components/todo_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class HomePage extends HookConsumerWidget {
@@ -14,14 +16,24 @@ class HomePage extends HookConsumerWidget {
 
     final todos = ref.watch(todoWithCategoryProvider);
     return Scaffold(
-      appBar: AppBar(title: Text("home", textAlign: TextAlign.center)),
+      appBar: AppBar(
+        title: Text("home", textAlign: TextAlign.center),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.pushNamed('search');
+            },
+            icon: Icon(Icons.search),
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           children: [
             TextFormField(
               controller: controller,
-              onFieldSubmitted: (value) {
+              onFieldSubmitted: (value) async {
                 ref
                     .read(repositoryProvider.notifier)
                     .saveTodos(description: controller.text);
@@ -33,8 +45,9 @@ class HomePage extends HookConsumerWidget {
                 data: (todos) => ListView.builder(
                   itemCount: todos.length,
                   itemBuilder: (context, index) => ProviderScope(
-                      overrides: [currentTodo.overrideWithValue(todos[index])],
-                      child: const TodoCard()),
+                    overrides: [currentTodo.overrideWithValue(todos[index])],
+                    child: const TodoCard(),
+                  ),
                 ),
                 error: (_, _) => Text("error"),
                 loading: () {

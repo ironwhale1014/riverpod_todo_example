@@ -61,6 +61,13 @@ class Repository extends _$Repository {
         )
         .watch();
   }
+
+  Future<List<TodoWithCategory>> searchTodoWithCategory(String searchText) {
+    return database
+        .search(searchText)
+        .map((row) => TodoWithCategory(todoEntry: row.todo, category: row.cat))
+        .get();
+  }
 }
 
 class TodoWithCategory {

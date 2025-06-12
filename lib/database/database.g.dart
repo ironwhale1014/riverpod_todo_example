@@ -756,6 +756,19 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'CREATE TRIGGER todo_delete AFTER DELETE ON todos BEGIN INSERT INTO test_entries (test_entries, "rowid", description) VALUES (\'delete\', old.id, old.description);END',
     'todo_delete',
   );
+  Selectable<SearchResult> search(String query) {
+    return customSelect(
+      'SELECT"todo"."id" AS "nested_0.id", "todo"."description" AS "nested_0.description", "todo"."due_date" AS "nested_0.due_date", "todo"."category" AS "nested_0.category","cat"."id" AS "nested_1.id", "cat"."name" AS "nested_1.name", "cat"."color" AS "nested_1.color" FROM test_entries INNER JOIN todos AS todo ON todo.id = test_entries."rowid" LEFT OUTER JOIN categories AS cat ON cat.id = todo.category WHERE test_entries MATCH ?1 ORDER BY rank',
+      variables: [Variable<String>(query)],
+      readsFrom: {testEntries, todos, categories},
+    ).asyncMap(
+      (QueryRow row) async => SearchResult(
+        todo: await todos.mapFromRow(row, tablePrefix: 'nested_0'),
+        cat: await categories.mapFromRowOrNull(row, tablePrefix: 'nested_1'),
+      ),
+    );
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1460,6 +1473,12 @@ class $AppDatabaseManager {
       $$TodosTableTableManager(_db, _db.todos);
   $TestEntriesTableManager get testEntries =>
       $TestEntriesTableManager(_db, _db.testEntries);
+}
+
+class SearchResult {
+  final TodoEntry todo;
+  final Category? cat;
+  SearchResult({required this.todo, this.cat});
 }
 
 // **************************************************************************

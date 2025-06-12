@@ -43,7 +43,7 @@ final class RepositoryProvider extends $NotifierProvider<Repository, void> {
   }
 }
 
-String _$repositoryHash() => r'f820692d3833efaa80e2eedf5ee3ae24e5d84d83';
+String _$repositoryHash() => r'1960aa0909fdf4ff29ecf00b48f4724286469551';
 
 abstract class _$Repository extends $Notifier<void> {
   void build();
