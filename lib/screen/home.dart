@@ -1,6 +1,6 @@
-import 'package:drift_todo_train/common/logger.dart';
 import 'package:drift_todo_train/database/repository_provider.dart';
 import 'package:drift_todo_train/database/state.dart';
+import 'package:drift_todo_train/screen/components/categories_drawer.dart';
 import 'package:drift_todo_train/screen/components/todo_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -15,9 +15,10 @@ class HomePage extends HookConsumerWidget {
     final controller = useTextEditingController();
 
     final todos = ref.watch(todoWithCategoryProvider);
+    final category = ref.watch(categoryStateProvider)?.name??'기본';
     return Scaffold(
       appBar: AppBar(
-        title: Text("home", textAlign: TextAlign.center),
+        title: Text('현재 폴더: $category', textAlign: TextAlign.center),
         actions: [
           IconButton(
             onPressed: () {
@@ -27,6 +28,7 @@ class HomePage extends HookConsumerWidget {
           ),
         ],
       ),
+      drawer: CategoriesDrawer(),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
@@ -36,7 +38,10 @@ class HomePage extends HookConsumerWidget {
               onFieldSubmitted: (value) async {
                 ref
                     .read(repositoryProvider.notifier)
-                    .saveTodos(description: controller.text);
+                    .saveTodos(
+                      description: controller.text,
+                      categoryId: ref.read(categoryStateProvider)?.id,
+                    );
                 controller.clear();
               },
             ),

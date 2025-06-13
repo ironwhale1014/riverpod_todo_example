@@ -24,3 +24,7 @@ search: SELECT todo.**, cat.** FROM test_entries
             LEFT OUTER JOIN categories cat ON cat.id = todo.category
             WHERE test_entries MATCH :query
             ORDER BY rank;
+
+getCategoriesWithCount: SELECT c.*,(SELECT COUNT(*) FROM todos WHERE todos.category=c.id) as amount FROM categories c
+                        UNION ALL
+                        SELECT null,null,null,(SELECT COUNT(*) FROM todos WHERE todos.category IS NULL);

@@ -769,6 +769,24 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     );
   }
 
+  Selectable<GetCategoriesWithCountResult> getCategoriesWithCount() {
+    return customSelect(
+      'SELECT c.*, (SELECT COUNT(*) FROM todos WHERE todos.category = c.id) AS amount FROM categories AS c UNION ALL SELECT NULL, NULL, NULL, (SELECT COUNT(*) FROM todos WHERE todos.category IS NULL)',
+      variables: [],
+      readsFrom: {todos, categories},
+    ).map(
+      (QueryRow row) => GetCategoriesWithCountResult(
+        id: row.readNullable<int>('id'),
+        name: row.readNullable<String>('name'),
+        color: NullAwareTypeConverter.wrapFromSql(
+          $CategoriesTable.$convertercolor,
+          row.readNullable<int>('color'),
+        ),
+        amount: row.read<int>('amount'),
+      ),
+    );
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1479,6 +1497,19 @@ class SearchResult {
   final TodoEntry todo;
   final Category? cat;
   SearchResult({required this.todo, this.cat});
+}
+
+class GetCategoriesWithCountResult {
+  final int? id;
+  final String? name;
+  final Color? color;
+  final int amount;
+  GetCategoriesWithCountResult({
+    this.id,
+    this.name,
+    this.color,
+    required this.amount,
+  });
 }
 
 // **************************************************************************

@@ -11,7 +11,7 @@ class CategoryState extends _$CategoryState {
     return null;
   }
 
-  void setCategory(Category category) {
+  void setCategory(Category? category) {
     state = category;
   }
 }

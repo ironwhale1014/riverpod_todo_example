@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'database.dart';
+import 'package:flutter/material.dart';
 
 part 'repository_provider.g.dart';
 
@@ -15,12 +18,12 @@ class Repository extends _$Repository {
     return;
   }
 
-  Future<int> saveTodos({
-    required String description,
-    String? categoryId,
-  }) async {
+  Future<int> saveTodos({required String description, int? categoryId}) async {
     return await database.todos.insertOne(
-      TodosCompanion.insert(description: description),
+      TodosCompanion.insert(
+        description: description,
+        category: Value(categoryId),
+      ),
     );
   }
 
@@ -68,6 +71,31 @@ class Repository extends _$Repository {
         .map((row) => TodoWithCategory(todoEntry: row.todo, category: row.cat))
         .get();
   }
+
+  Stream<List<CategoryWithCount>> getCategoryWithCount() {
+    return database
+        .getCategoriesWithCount()
+        .map(
+          (row) => CategoryWithCount(
+            category: (row.id != null)
+                ? Category(id: row.id!, name: row.name!, color: row.color!)
+                : null,
+            count: row.amount,
+          ),
+        )
+        .watch();
+  }
+
+  Future<void> saveCategory(String category) async {
+    final random = Random();
+    final randomIndex = random.nextInt(Colors.primaries.length);
+    await database.categories.insertOne(
+      CategoriesCompanion.insert(
+        name: category,
+        color: Colors.primaries[randomIndex],
+      ),
+    );
+  }
 }
 
 class TodoWithCategory {
@@ -75,4 +103,11 @@ class TodoWithCategory {
   final Category? category;
 
   TodoWithCategory({required this.todoEntry, this.category});
+}
+
+class CategoryWithCount {
+  final Category? category;
+  final int count;
+
+  CategoryWithCount({this.category, required this.count});
 }
