@@ -96,6 +96,10 @@ class Repository extends _$Repository {
       ),
     );
   }
+
+  Future<void> updateCategory(Category category) async {
+    await database.categories.replaceOne(category);
+  }
 }
 
 class TodoWithCategory {

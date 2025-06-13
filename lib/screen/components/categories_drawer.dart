@@ -1,7 +1,9 @@
+import 'package:drift_todo_train/common/logger.dart';
 import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/database/repository_provider.dart';
 import 'package:drift_todo_train/database/state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -77,8 +79,23 @@ class _CategoryDrawerEntry extends ConsumerWidget {
 
     final List<Widget> rowData = [
       GestureDetector(
-        onTap: (){
-
+        onTap: () async {
+          final Color? newColor = await showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: Text('pick color'),
+              content: BlockPicker(
+                pickerColor: category?.color ?? Colors.transparent,
+                onColorChanged: (color) => context.pop(color),
+              ),
+            ),
+          );
+          logger.d(newColor);
+          if (newColor != null) {
+            ref
+                .read(repositoryProvider.notifier)
+                .updateCategory(category!.copyWith(color: newColor));
+          }
         },
         child: DecoratedBox(
           decoration: BoxDecoration(
