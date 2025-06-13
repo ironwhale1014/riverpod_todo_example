@@ -25,8 +25,8 @@ class CategoriesDrawer extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: TextFormField(
               decoration: InputDecoration(
-                hintText: '폴더 추가'
-                    ,helperText: '폴더 추가는 여기에서'
+                hintText: '폴더 추가',
+                helperText: '폴더 추가는 여기에서',
               ),
               controller: categoryController,
               onFieldSubmitted: (_) {
@@ -74,6 +74,23 @@ class _CategoryDrawerEntry extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Category? category = categoryWithCount.category;
     final isActive = ref.watch(categoryStateProvider)?.id == category?.id;
+
+    final List<Widget> rowData = [
+      GestureDetector(
+        onTap: (){
+
+        },
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: category?.color ?? Colors.transparent,
+          ),
+          child: SizedBox.square(dimension: 20),
+        ),
+      ),
+      Text(category?.name ?? "기본"),
+      Text('${categoryWithCount.count} entries'),
+    ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Material(
@@ -88,7 +105,10 @@ class _CategoryDrawerEntry extends ConsumerWidget {
           },
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(category?.name ?? "기본"),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: rowData,
+            ),
           ),
         ),
       ),
