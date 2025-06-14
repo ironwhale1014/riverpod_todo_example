@@ -100,6 +100,16 @@ class Repository extends _$Repository {
   Future<void> updateCategory(Category category) async {
     await database.categories.replaceOne(category);
   }
+
+  Future<void> deleteCategory(Category category) async {
+    await database.transaction(() async {
+      await (database.todos.update()
+            ..where((todo) => todo.category.equals(category.id)))
+          .write(TodosCompanion(category: Value(null)));
+
+      await database.categories.deleteOne(category);
+    });
+  }
 }
 
 class TodoWithCategory {
