@@ -3,6 +3,262 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
+class $TodoEntriesTable extends TodoEntries
+    with TableInfo<$TodoEntriesTable, TodoEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TodoEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dueDateMeta = const VerificationMeta(
+    'dueDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dueDate = GeneratedColumn<DateTime>(
+    'due_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, description, dueDate];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'todo_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TodoEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('due_date')) {
+      context.handle(
+        _dueDateMeta,
+        dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TodoEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TodoEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      dueDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}due_date'],
+      ),
+    );
+  }
+
+  @override
+  $TodoEntriesTable createAlias(String alias) {
+    return $TodoEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class TodoEntry extends DataClass implements Insertable<TodoEntry> {
+  final int id;
+  final String description;
+  final DateTime? dueDate;
+  const TodoEntry({required this.id, required this.description, this.dueDate});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['description'] = Variable<String>(description);
+    if (!nullToAbsent || dueDate != null) {
+      map['due_date'] = Variable<DateTime>(dueDate);
+    }
+    return map;
+  }
+
+  TodoEntriesCompanion toCompanion(bool nullToAbsent) {
+    return TodoEntriesCompanion(
+      id: Value(id),
+      description: Value(description),
+      dueDate: dueDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dueDate),
+    );
+  }
+
+  factory TodoEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TodoEntry(
+      id: serializer.fromJson<int>(json['id']),
+      description: serializer.fromJson<String>(json['description']),
+      dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'description': serializer.toJson<String>(description),
+      'dueDate': serializer.toJson<DateTime?>(dueDate),
+    };
+  }
+
+  TodoEntry copyWith({
+    int? id,
+    String? description,
+    Value<DateTime?> dueDate = const Value.absent(),
+  }) => TodoEntry(
+    id: id ?? this.id,
+    description: description ?? this.description,
+    dueDate: dueDate.present ? dueDate.value : this.dueDate,
+  );
+  TodoEntry copyWithCompanion(TodoEntriesCompanion data) {
+    return TodoEntry(
+      id: data.id.present ? data.id.value : this.id,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TodoEntry(')
+          ..write('id: $id, ')
+          ..write('description: $description, ')
+          ..write('dueDate: $dueDate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, description, dueDate);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TodoEntry &&
+          other.id == this.id &&
+          other.description == this.description &&
+          other.dueDate == this.dueDate);
+}
+
+class TodoEntriesCompanion extends UpdateCompanion<TodoEntry> {
+  final Value<int> id;
+  final Value<String> description;
+  final Value<DateTime?> dueDate;
+  const TodoEntriesCompanion({
+    this.id = const Value.absent(),
+    this.description = const Value.absent(),
+    this.dueDate = const Value.absent(),
+  });
+  TodoEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    required String description,
+    this.dueDate = const Value.absent(),
+  }) : description = Value(description);
+  static Insertable<TodoEntry> custom({
+    Expression<int>? id,
+    Expression<String>? description,
+    Expression<DateTime>? dueDate,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (description != null) 'description': description,
+      if (dueDate != null) 'due_date': dueDate,
+    });
+  }
+
+  TodoEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? description,
+    Value<DateTime?>? dueDate,
+  }) {
+    return TodoEntriesCompanion(
+      id: id ?? this.id,
+      description: description ?? this.description,
+      dueDate: dueDate ?? this.dueDate,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (dueDate.present) {
+      map['due_date'] = Variable<DateTime>(dueDate.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TodoEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('description: $description, ')
+          ..write('dueDate: $dueDate')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CategoriesTable extends Categories
     with TableInfo<$CategoriesTable, Category> {
   @override
@@ -247,543 +503,173 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   }
 }
 
-class $TodoEntriesTable extends TodoEntries
-    with TableInfo<$TodoEntriesTable, TodoEntry> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $TodoEntriesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _descriptionMeta = const VerificationMeta(
-    'description',
-  );
-  @override
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-    'description',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _dueDateMeta = const VerificationMeta(
-    'dueDate',
-  );
-  @override
-  late final GeneratedColumn<DateTime> dueDate = GeneratedColumn<DateTime>(
-    'due_date',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _categoryMeta = const VerificationMeta(
-    'category',
-  );
-  @override
-  late final GeneratedColumn<int> category = GeneratedColumn<int>(
-    'category',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES categories (id)',
-    ),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [id, description, dueDate, category];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'todo_entries';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<TodoEntry> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('description')) {
-      context.handle(
-        _descriptionMeta,
-        description.isAcceptableOrUnknown(
-          data['description']!,
-          _descriptionMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_descriptionMeta);
-    }
-    if (data.containsKey('due_date')) {
-      context.handle(
-        _dueDateMeta,
-        dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta),
-      );
-    }
-    if (data.containsKey('category')) {
-      context.handle(
-        _categoryMeta,
-        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  TodoEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return TodoEntry(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      description: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}description'],
-      )!,
-      dueDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}due_date'],
-      ),
-      category: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}category'],
-      ),
-    );
-  }
-
-  @override
-  $TodoEntriesTable createAlias(String alias) {
-    return $TodoEntriesTable(attachedDatabase, alias);
-  }
-}
-
-class TodoEntry extends DataClass implements Insertable<TodoEntry> {
-  final int id;
-  final String description;
-  final DateTime? dueDate;
-  final int? category;
-  const TodoEntry({
-    required this.id,
-    required this.description,
-    this.dueDate,
-    this.category,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['description'] = Variable<String>(description);
-    if (!nullToAbsent || dueDate != null) {
-      map['due_date'] = Variable<DateTime>(dueDate);
-    }
-    if (!nullToAbsent || category != null) {
-      map['category'] = Variable<int>(category);
-    }
-    return map;
-  }
-
-  TodoEntriesCompanion toCompanion(bool nullToAbsent) {
-    return TodoEntriesCompanion(
-      id: Value(id),
-      description: Value(description),
-      dueDate: dueDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(dueDate),
-      category: category == null && nullToAbsent
-          ? const Value.absent()
-          : Value(category),
-    );
-  }
-
-  factory TodoEntry.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return TodoEntry(
-      id: serializer.fromJson<int>(json['id']),
-      description: serializer.fromJson<String>(json['description']),
-      dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
-      category: serializer.fromJson<int?>(json['category']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'description': serializer.toJson<String>(description),
-      'dueDate': serializer.toJson<DateTime?>(dueDate),
-      'category': serializer.toJson<int?>(category),
-    };
-  }
-
-  TodoEntry copyWith({
-    int? id,
-    String? description,
-    Value<DateTime?> dueDate = const Value.absent(),
-    Value<int?> category = const Value.absent(),
-  }) => TodoEntry(
-    id: id ?? this.id,
-    description: description ?? this.description,
-    dueDate: dueDate.present ? dueDate.value : this.dueDate,
-    category: category.present ? category.value : this.category,
-  );
-  TodoEntry copyWithCompanion(TodoEntriesCompanion data) {
-    return TodoEntry(
-      id: data.id.present ? data.id.value : this.id,
-      description: data.description.present
-          ? data.description.value
-          : this.description,
-      dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
-      category: data.category.present ? data.category.value : this.category,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('TodoEntry(')
-          ..write('id: $id, ')
-          ..write('description: $description, ')
-          ..write('dueDate: $dueDate, ')
-          ..write('category: $category')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, description, dueDate, category);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is TodoEntry &&
-          other.id == this.id &&
-          other.description == this.description &&
-          other.dueDate == this.dueDate &&
-          other.category == this.category);
-}
-
-class TodoEntriesCompanion extends UpdateCompanion<TodoEntry> {
-  final Value<int> id;
-  final Value<String> description;
-  final Value<DateTime?> dueDate;
-  final Value<int?> category;
-  const TodoEntriesCompanion({
-    this.id = const Value.absent(),
-    this.description = const Value.absent(),
-    this.dueDate = const Value.absent(),
-    this.category = const Value.absent(),
-  });
-  TodoEntriesCompanion.insert({
-    this.id = const Value.absent(),
-    required String description,
-    this.dueDate = const Value.absent(),
-    this.category = const Value.absent(),
-  }) : description = Value(description);
-  static Insertable<TodoEntry> custom({
-    Expression<int>? id,
-    Expression<String>? description,
-    Expression<DateTime>? dueDate,
-    Expression<int>? category,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (description != null) 'description': description,
-      if (dueDate != null) 'due_date': dueDate,
-      if (category != null) 'category': category,
-    });
-  }
-
-  TodoEntriesCompanion copyWith({
-    Value<int>? id,
-    Value<String>? description,
-    Value<DateTime?>? dueDate,
-    Value<int?>? category,
-  }) {
-    return TodoEntriesCompanion(
-      id: id ?? this.id,
-      description: description ?? this.description,
-      dueDate: dueDate ?? this.dueDate,
-      category: category ?? this.category,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
-    }
-    if (dueDate.present) {
-      map['due_date'] = Variable<DateTime>(dueDate.value);
-    }
-    if (category.present) {
-      map['category'] = Variable<int>(category.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('TodoEntriesCompanion(')
-          ..write('id: $id, ')
-          ..write('description: $description, ')
-          ..write('dueDate: $dueDate, ')
-          ..write('category: $category')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class TextEntries extends Table
-    with
-        TableInfo<TextEntries, TextEntry>,
-        VirtualTableInfo<TextEntries, TextEntry> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  TextEntries(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _descriptionMeta = const VerificationMeta(
-    'description',
-  );
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-    'description',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: '',
-  );
-  @override
-  List<GeneratedColumn> get $columns => [description];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'text_entries';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<TextEntry> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('description')) {
-      context.handle(
-        _descriptionMeta,
-        description.isAcceptableOrUnknown(
-          data['description']!,
-          _descriptionMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_descriptionMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => const {};
-  @override
-  TextEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return TextEntry(
-      description: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}description'],
-      )!,
-    );
-  }
-
-  @override
-  TextEntries createAlias(String alias) {
-    return TextEntries(attachedDatabase, alias);
-  }
-
-  @override
-  bool get dontWriteConstraints => true;
-  @override
-  String get moduleAndArgs =>
-      'fts5(description, content=todo_entries, content_rowid=id)';
-}
-
-class TextEntry extends DataClass implements Insertable<TextEntry> {
-  final String description;
-  const TextEntry({required this.description});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['description'] = Variable<String>(description);
-    return map;
-  }
-
-  TextEntriesCompanion toCompanion(bool nullToAbsent) {
-    return TextEntriesCompanion(description: Value(description));
-  }
-
-  factory TextEntry.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return TextEntry(
-      description: serializer.fromJson<String>(json['description']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'description': serializer.toJson<String>(description),
-    };
-  }
-
-  TextEntry copyWith({String? description}) =>
-      TextEntry(description: description ?? this.description);
-  TextEntry copyWithCompanion(TextEntriesCompanion data) {
-    return TextEntry(
-      description: data.description.present
-          ? data.description.value
-          : this.description,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('TextEntry(')
-          ..write('description: $description')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => description.hashCode;
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is TextEntry && other.description == this.description);
-}
-
-class TextEntriesCompanion extends UpdateCompanion<TextEntry> {
-  final Value<String> description;
-  final Value<int> rowid;
-  const TextEntriesCompanion({
-    this.description = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  TextEntriesCompanion.insert({
-    required String description,
-    this.rowid = const Value.absent(),
-  }) : description = Value(description);
-  static Insertable<TextEntry> custom({
-    Expression<String>? description,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (description != null) 'description': description,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  TextEntriesCompanion copyWith({
-    Value<String>? description,
-    Value<int>? rowid,
-  }) {
-    return TextEntriesCompanion(
-      description: description ?? this.description,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('TextEntriesCompanion(')
-          ..write('description: $description, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-abstract class _$AppDatabase extends GeneratedDatabase {
-  _$AppDatabase(QueryExecutor e) : super(e);
-  $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $CategoriesTable categories = $CategoriesTable(this);
+abstract class _$AppDataBase extends GeneratedDatabase {
+  _$AppDataBase(QueryExecutor e) : super(e);
+  $AppDataBaseManager get managers => $AppDataBaseManager(this);
   late final $TodoEntriesTable todoEntries = $TodoEntriesTable(this);
-  late final TextEntries textEntries = TextEntries(this);
-  late final Trigger todosInsert = Trigger(
-    'CREATE TRIGGER todos_insert AFTER INSERT ON todo_entries BEGIN INSERT INTO text_entries ("rowid", description) VALUES (new.id, new.description);END',
-    'todos_insert',
-  );
-  Selectable<SearchResult> search(String query) {
-    return customSelect(
-      'SELECT"todos"."id" AS "nested_0.id", "todos"."description" AS "nested_0.description", "todos"."due_date" AS "nested_0.due_date", "todos"."category" AS "nested_0.category","cat"."id" AS "nested_1.id", "cat"."name" AS "nested_1.name", "cat"."color" AS "nested_1.color" FROM text_entries INNER JOIN todo_entries AS todos ON todos.id = text_entries."rowid" LEFT OUTER JOIN categories AS cat ON cat.id = todos.category WHERE text_entries MATCH ?1 || \'*\' ORDER BY rank',
-      variables: [Variable<String>(query)],
-      readsFrom: {textEntries, todoEntries, categories},
-    ).asyncMap(
-      (QueryRow row) async => SearchResult(
-        todos: await todoEntries.mapFromRow(row, tablePrefix: 'nested_0'),
-        cat: await categories.mapFromRowOrNull(row, tablePrefix: 'nested_1'),
-      ),
-    );
-  }
-
+  late final $CategoriesTable categories = $CategoriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [
-    categories,
-    todoEntries,
-    textEntries,
-    todosInsert,
-  ];
-  @override
-  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'todo_entries',
-        limitUpdateKind: UpdateKind.insert,
-      ),
-      result: [TableUpdate('text_entries', kind: UpdateKind.insert)],
-    ),
-  ]);
+  List<DatabaseSchemaEntity> get allSchemaEntities => [todoEntries, categories];
 }
 
+typedef $$TodoEntriesTableCreateCompanionBuilder =
+    TodoEntriesCompanion Function({
+      Value<int> id,
+      required String description,
+      Value<DateTime?> dueDate,
+    });
+typedef $$TodoEntriesTableUpdateCompanionBuilder =
+    TodoEntriesCompanion Function({
+      Value<int> id,
+      Value<String> description,
+      Value<DateTime?> dueDate,
+    });
+
+class $$TodoEntriesTableFilterComposer
+    extends Composer<_$AppDataBase, $TodoEntriesTable> {
+  $$TodoEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TodoEntriesTableOrderingComposer
+    extends Composer<_$AppDataBase, $TodoEntriesTable> {
+  $$TodoEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TodoEntriesTableAnnotationComposer
+    extends Composer<_$AppDataBase, $TodoEntriesTable> {
+  $$TodoEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get dueDate =>
+      $composableBuilder(column: $table.dueDate, builder: (column) => column);
+}
+
+class $$TodoEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDataBase,
+          $TodoEntriesTable,
+          TodoEntry,
+          $$TodoEntriesTableFilterComposer,
+          $$TodoEntriesTableOrderingComposer,
+          $$TodoEntriesTableAnnotationComposer,
+          $$TodoEntriesTableCreateCompanionBuilder,
+          $$TodoEntriesTableUpdateCompanionBuilder,
+          (
+            TodoEntry,
+            BaseReferences<_$AppDataBase, $TodoEntriesTable, TodoEntry>,
+          ),
+          TodoEntry,
+          PrefetchHooks Function()
+        > {
+  $$TodoEntriesTableTableManager(_$AppDataBase db, $TodoEntriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TodoEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TodoEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TodoEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<DateTime?> dueDate = const Value.absent(),
+              }) => TodoEntriesCompanion(
+                id: id,
+                description: description,
+                dueDate: dueDate,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String description,
+                Value<DateTime?> dueDate = const Value.absent(),
+              }) => TodoEntriesCompanion.insert(
+                id: id,
+                description: description,
+                dueDate: dueDate,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TodoEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDataBase,
+      $TodoEntriesTable,
+      TodoEntry,
+      $$TodoEntriesTableFilterComposer,
+      $$TodoEntriesTableOrderingComposer,
+      $$TodoEntriesTableAnnotationComposer,
+      $$TodoEntriesTableCreateCompanionBuilder,
+      $$TodoEntriesTableUpdateCompanionBuilder,
+      (TodoEntry, BaseReferences<_$AppDataBase, $TodoEntriesTable, TodoEntry>),
+      TodoEntry,
+      PrefetchHooks Function()
+    >;
 typedef $$CategoriesTableCreateCompanionBuilder =
     CategoriesCompanion Function({
       Value<int> id,
@@ -797,31 +683,8 @@ typedef $$CategoriesTableUpdateCompanionBuilder =
       Value<Color> color,
     });
 
-final class $$CategoriesTableReferences
-    extends BaseReferences<_$AppDatabase, $CategoriesTable, Category> {
-  $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$TodoEntriesTable, List<TodoEntry>>
-  _todoEntriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.todoEntries,
-    aliasName: $_aliasNameGenerator(db.categories.id, db.todoEntries.category),
-  );
-
-  $$TodoEntriesTableProcessedTableManager get todoEntriesRefs {
-    final manager = $$TodoEntriesTableTableManager(
-      $_db,
-      $_db.todoEntries,
-    ).filter((f) => f.category.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_todoEntriesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
 class $$CategoriesTableFilterComposer
-    extends Composer<_$AppDatabase, $CategoriesTable> {
+    extends Composer<_$AppDataBase, $CategoriesTable> {
   $$CategoriesTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -844,35 +707,10 @@ class $$CategoriesTableFilterComposer
         column: $table.color,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
-
-  Expression<bool> todoEntriesRefs(
-    Expression<bool> Function($$TodoEntriesTableFilterComposer f) f,
-  ) {
-    final $$TodoEntriesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.todoEntries,
-      getReferencedColumn: (t) => t.category,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TodoEntriesTableFilterComposer(
-            $db: $db,
-            $table: $db.todoEntries,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$CategoriesTableOrderingComposer
-    extends Composer<_$AppDatabase, $CategoriesTable> {
+    extends Composer<_$AppDataBase, $CategoriesTable> {
   $$CategoriesTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -897,7 +735,7 @@ class $$CategoriesTableOrderingComposer
 }
 
 class $$CategoriesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $CategoriesTable> {
+    extends Composer<_$AppDataBase, $CategoriesTable> {
   $$CategoriesTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -913,37 +751,12 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<Color, int> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
-
-  Expression<T> todoEntriesRefs<T extends Object>(
-    Expression<T> Function($$TodoEntriesTableAnnotationComposer a) f,
-  ) {
-    final $$TodoEntriesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.todoEntries,
-      getReferencedColumn: (t) => t.category,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TodoEntriesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.todoEntries,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$CategoriesTableTableManager
     extends
         RootTableManager<
-          _$AppDatabase,
+          _$AppDataBase,
           $CategoriesTable,
           Category,
           $$CategoriesTableFilterComposer,
@@ -951,11 +764,11 @@ class $$CategoriesTableTableManager
           $$CategoriesTableAnnotationComposer,
           $$CategoriesTableCreateCompanionBuilder,
           $$CategoriesTableUpdateCompanionBuilder,
-          (Category, $$CategoriesTableReferences),
+          (Category, BaseReferences<_$AppDataBase, $CategoriesTable, Category>),
           Category,
-          PrefetchHooks Function({bool todoEntriesRefs})
+          PrefetchHooks Function()
         > {
-  $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
+  $$CategoriesTableTableManager(_$AppDataBase db, $CategoriesTable table)
     : super(
         TableManagerState(
           db: db,
@@ -980,453 +793,6 @@ class $$CategoriesTableTableManager
               }) =>
                   CategoriesCompanion.insert(id: id, name: name, color: color),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$CategoriesTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback: ({todoEntriesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (todoEntriesRefs) db.todoEntries],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (todoEntriesRefs)
-                    await $_getPrefetchedData<
-                      Category,
-                      $CategoriesTable,
-                      TodoEntry
-                    >(
-                      currentTable: table,
-                      referencedTable: $$CategoriesTableReferences
-                          ._todoEntriesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$CategoriesTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).todoEntriesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.category == item.id),
-                      typedResults: items,
-                    ),
-                ];
-              },
-            );
-          },
-        ),
-      );
-}
-
-typedef $$CategoriesTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $CategoriesTable,
-      Category,
-      $$CategoriesTableFilterComposer,
-      $$CategoriesTableOrderingComposer,
-      $$CategoriesTableAnnotationComposer,
-      $$CategoriesTableCreateCompanionBuilder,
-      $$CategoriesTableUpdateCompanionBuilder,
-      (Category, $$CategoriesTableReferences),
-      Category,
-      PrefetchHooks Function({bool todoEntriesRefs})
-    >;
-typedef $$TodoEntriesTableCreateCompanionBuilder =
-    TodoEntriesCompanion Function({
-      Value<int> id,
-      required String description,
-      Value<DateTime?> dueDate,
-      Value<int?> category,
-    });
-typedef $$TodoEntriesTableUpdateCompanionBuilder =
-    TodoEntriesCompanion Function({
-      Value<int> id,
-      Value<String> description,
-      Value<DateTime?> dueDate,
-      Value<int?> category,
-    });
-
-final class $$TodoEntriesTableReferences
-    extends BaseReferences<_$AppDatabase, $TodoEntriesTable, TodoEntry> {
-  $$TodoEntriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $CategoriesTable _categoryTable(_$AppDatabase db) =>
-      db.categories.createAlias(
-        $_aliasNameGenerator(db.todoEntries.category, db.categories.id),
-      );
-
-  $$CategoriesTableProcessedTableManager? get category {
-    final $_column = $_itemColumn<int>('category');
-    if ($_column == null) return null;
-    final manager = $$CategoriesTableTableManager(
-      $_db,
-      $_db.categories,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_categoryTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
-class $$TodoEntriesTableFilterComposer
-    extends Composer<_$AppDatabase, $TodoEntriesTable> {
-  $$TodoEntriesTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get dueDate => $composableBuilder(
-    column: $table.dueDate,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  $$CategoriesTableFilterComposer get category {
-    final $$CategoriesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.category,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableFilterComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$TodoEntriesTableOrderingComposer
-    extends Composer<_$AppDatabase, $TodoEntriesTable> {
-  $$TodoEntriesTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get dueDate => $composableBuilder(
-    column: $table.dueDate,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  $$CategoriesTableOrderingComposer get category {
-    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.category,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableOrderingComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$TodoEntriesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $TodoEntriesTable> {
-  $$TodoEntriesTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<DateTime> get dueDate =>
-      $composableBuilder(column: $table.dueDate, builder: (column) => column);
-
-  $$CategoriesTableAnnotationComposer get category {
-    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.category,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$TodoEntriesTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $TodoEntriesTable,
-          TodoEntry,
-          $$TodoEntriesTableFilterComposer,
-          $$TodoEntriesTableOrderingComposer,
-          $$TodoEntriesTableAnnotationComposer,
-          $$TodoEntriesTableCreateCompanionBuilder,
-          $$TodoEntriesTableUpdateCompanionBuilder,
-          (TodoEntry, $$TodoEntriesTableReferences),
-          TodoEntry,
-          PrefetchHooks Function({bool category})
-        > {
-  $$TodoEntriesTableTableManager(_$AppDatabase db, $TodoEntriesTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$TodoEntriesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$TodoEntriesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$TodoEntriesTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> description = const Value.absent(),
-                Value<DateTime?> dueDate = const Value.absent(),
-                Value<int?> category = const Value.absent(),
-              }) => TodoEntriesCompanion(
-                id: id,
-                description: description,
-                dueDate: dueDate,
-                category: category,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String description,
-                Value<DateTime?> dueDate = const Value.absent(),
-                Value<int?> category = const Value.absent(),
-              }) => TodoEntriesCompanion.insert(
-                id: id,
-                description: description,
-                dueDate: dueDate,
-                category: category,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$TodoEntriesTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback: ({category = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (category) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.category,
-                                referencedTable: $$TodoEntriesTableReferences
-                                    ._categoryTable(db),
-                                referencedColumn: $$TodoEntriesTableReferences
-                                    ._categoryTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
-        ),
-      );
-}
-
-typedef $$TodoEntriesTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $TodoEntriesTable,
-      TodoEntry,
-      $$TodoEntriesTableFilterComposer,
-      $$TodoEntriesTableOrderingComposer,
-      $$TodoEntriesTableAnnotationComposer,
-      $$TodoEntriesTableCreateCompanionBuilder,
-      $$TodoEntriesTableUpdateCompanionBuilder,
-      (TodoEntry, $$TodoEntriesTableReferences),
-      TodoEntry,
-      PrefetchHooks Function({bool category})
-    >;
-typedef $TextEntriesCreateCompanionBuilder =
-    TextEntriesCompanion Function({
-      required String description,
-      Value<int> rowid,
-    });
-typedef $TextEntriesUpdateCompanionBuilder =
-    TextEntriesCompanion Function({
-      Value<String> description,
-      Value<int> rowid,
-    });
-
-class $TextEntriesFilterComposer extends Composer<_$AppDatabase, TextEntries> {
-  $TextEntriesFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $TextEntriesOrderingComposer
-    extends Composer<_$AppDatabase, TextEntries> {
-  $TextEntriesOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $TextEntriesAnnotationComposer
-    extends Composer<_$AppDatabase, TextEntries> {
-  $TextEntriesAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => column,
-  );
-}
-
-class $TextEntriesTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          TextEntries,
-          TextEntry,
-          $TextEntriesFilterComposer,
-          $TextEntriesOrderingComposer,
-          $TextEntriesAnnotationComposer,
-          $TextEntriesCreateCompanionBuilder,
-          $TextEntriesUpdateCompanionBuilder,
-          (TextEntry, BaseReferences<_$AppDatabase, TextEntries, TextEntry>),
-          TextEntry,
-          PrefetchHooks Function()
-        > {
-  $TextEntriesTableManager(_$AppDatabase db, TextEntries table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $TextEntriesFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $TextEntriesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $TextEntriesAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> description = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) =>
-                  TextEntriesCompanion(description: description, rowid: rowid),
-          createCompanionCallback:
-              ({
-                required String description,
-                Value<int> rowid = const Value.absent(),
-              }) => TextEntriesCompanion.insert(
-                description: description,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
@@ -1434,36 +800,28 @@ class $TextEntriesTableManager
       );
 }
 
-typedef $TextEntriesProcessedTableManager =
+typedef $$CategoriesTableProcessedTableManager =
     ProcessedTableManager<
-      _$AppDatabase,
-      TextEntries,
-      TextEntry,
-      $TextEntriesFilterComposer,
-      $TextEntriesOrderingComposer,
-      $TextEntriesAnnotationComposer,
-      $TextEntriesCreateCompanionBuilder,
-      $TextEntriesUpdateCompanionBuilder,
-      (TextEntry, BaseReferences<_$AppDatabase, TextEntries, TextEntry>),
-      TextEntry,
+      _$AppDataBase,
+      $CategoriesTable,
+      Category,
+      $$CategoriesTableFilterComposer,
+      $$CategoriesTableOrderingComposer,
+      $$CategoriesTableAnnotationComposer,
+      $$CategoriesTableCreateCompanionBuilder,
+      $$CategoriesTableUpdateCompanionBuilder,
+      (Category, BaseReferences<_$AppDataBase, $CategoriesTable, Category>),
+      Category,
       PrefetchHooks Function()
     >;
 
-class $AppDatabaseManager {
-  final _$AppDatabase _db;
-  $AppDatabaseManager(this._db);
-  $$CategoriesTableTableManager get categories =>
-      $$CategoriesTableTableManager(_db, _db.categories);
+class $AppDataBaseManager {
+  final _$AppDataBase _db;
+  $AppDataBaseManager(this._db);
   $$TodoEntriesTableTableManager get todoEntries =>
       $$TodoEntriesTableTableManager(_db, _db.todoEntries);
-  $TextEntriesTableManager get textEntries =>
-      $TextEntriesTableManager(_db, _db.textEntries);
-}
-
-class SearchResult {
-  final TodoEntry todos;
-  final Category? cat;
-  SearchResult({required this.todos, this.cat});
+  $$CategoriesTableTableManager get categories =>
+      $$CategoriesTableTableManager(_db, _db.categories);
 }
 
 // **************************************************************************
@@ -1474,7 +832,7 @@ class SearchResult {
 const databaseStateProvider = DatabaseStateProvider._();
 
 final class DatabaseStateProvider
-    extends $NotifierProvider<DatabaseState, AppDatabase> {
+    extends $NotifierProvider<DatabaseState, AppDataBase> {
   const DatabaseStateProvider._()
     : super(
         from: null,
@@ -1493,35 +851,29 @@ final class DatabaseStateProvider
   @override
   DatabaseState create() => DatabaseState();
 
-  @$internal
-  @override
-  $NotifierProviderElement<DatabaseState, AppDatabase> $createElement(
-    $ProviderPointer pointer,
-  ) => $NotifierProviderElement(pointer);
-
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AppDatabase value) {
+  Override overrideWithValue(AppDataBase value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $ValueProvider<AppDatabase>(value),
+      providerOverride: $SyncValueProvider<AppDataBase>(value),
     );
   }
 }
 
-String _$databaseStateHash() => r'a2beff308593bade775704db933f8cd445ec3ea0';
+String _$databaseStateHash() => r'656e15e2112a399ceeba032dad966abbf5e32e16';
 
-abstract class _$DatabaseState extends $Notifier<AppDatabase> {
-  AppDatabase build();
+abstract class _$DatabaseState extends $Notifier<AppDataBase> {
+  AppDataBase build();
   @$mustCallSuper
   @override
   void runBuild() {
     final created = build();
-    final ref = this.ref as $Ref<AppDatabase>;
+    final ref = this.ref as $Ref<AppDataBase, AppDataBase>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AppDatabase>,
-              AppDatabase,
+              AnyNotifier<AppDataBase, AppDataBase>,
+              AppDataBase,
               Object?,
               Object?
             >;

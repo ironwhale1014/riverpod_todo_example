@@ -1,88 +1,12 @@
-import 'package:drift_todo_train/database/database.dart';
-import 'package:drift_todo_train/screen/component/todo_card.dart';
-import 'package:drift_todo_train/service/service.dart';
-import 'package:drift_todo_train/service/todo_with_category_provider.dart';
+import 'package:drift_todo_train/common/layout/default_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../common/logger.dart';
-import '../model/todo_with_category.dart';
-
-class HomePage extends ConsumerStatefulWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  ConsumerState createState() => _HomePageState();
-}
-
-class _HomePageState extends ConsumerState<HomePage> {
-  final _controller = TextEditingController();
-
-  void _addTodos() async {
-    if (_controller.text.isNotEmpty) {
-      final category = ref.read(categoryStateProvider);
-
-      await ref
-          .read(todoServiceProvider.notifier)
-          .saveTodo(description: _controller.text, category: category?.id);
-      _controller.clear();
-    }
-    if (_controller.text.isEmpty) {
-      List<TodoWithCategory> list = await ref
-          .read(todoServiceProvider.notifier)
-          .search('fix');
-      if(list.isEmpty){
-        logger.d('list is empty');
-      }
-      for (TodoWithCategory o in list) {
-        logger.d(o.todoEntry.description);
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final todos = ref.watch(todoWithCategoryProvider);
-    return Scaffold(
-      appBar: AppBar(title: Text('home')),
-      body: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _controller,
-                  onFieldSubmitted: (_) => _addTodos(),
-                ),
-              ),
-              TextButton(onPressed: _addTodos, child: Text("save")),
-            ],
-          ),
-          Expanded(
-            child: todos.when(
-              data: (todos) {
-                return ListView.builder(
-                  itemCount: todos.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final todo = todos[index].todoEntry;
-                    return ProviderScope(
-                      overrides: [currentTodo.overrideWithValue(todo)],
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: const TodoCard(),
-                      ),
-                    );
-                  },
-                );
-              },
-              error: (_, _) => Text("Error"),
-              loading: () => Center(child: CircularProgressIndicator()),
-            ),
-          ),
-        ],
-      ),
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    return DefaultLayout(title: '홈', child: Container());
   }
 }
-
-final currentTodo = Provider<TodoEntry>((ref) => throw UnimplementedError());
