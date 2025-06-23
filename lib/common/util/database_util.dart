@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-const String dbName = 'train_3_db';
+const String dbName = 'train_3_db.db';
 
 Future<File> get getDatabaseFile async {
   final dirPath = await getApplicationDocumentsDirectory();
