@@ -37,7 +37,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -47,6 +47,12 @@ class AppDatabase extends _$AppDatabase {
           logger.d('from1To2');
           await m.alterTable(TableMigration(schema.todoEntries));
           logger.d('from1To2 end');
+        },
+        from2To3: (Migrator m, Schema3 schema) async {
+          logger.d('from2To3');
+          await m.addColumn(schema.todoEntries, schema.todoEntries.category);
+          await m.alterTable(TableMigration(schema.todoEntries));
+          logger.d('from2To3 end');
         },
       ),
     );

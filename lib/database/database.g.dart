@@ -41,8 +41,22 @@ class $CategoriesTable extends Categories
         type: DriftSqlType.int,
         requiredDuringInsert: true,
       ).withConverter<Color>($CategoriesTable.$convertercolor);
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, color];
+  late final GeneratedColumn<int> category = GeneratedColumn<int>(
+    'category',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (id)',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, color, category];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -65,6 +79,12 @@ class $CategoriesTable extends Categories
       );
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
     }
     return context;
   }
@@ -89,6 +109,10 @@ class $CategoriesTable extends Categories
           data['${effectivePrefix}color'],
         )!,
       ),
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}category'],
+      ),
     );
   }
 
@@ -104,7 +128,13 @@ class Category extends DataClass implements Insertable<Category> {
   final int id;
   final String name;
   final Color color;
-  const Category({required this.id, required this.name, required this.color});
+  final int? category;
+  const Category({
+    required this.id,
+    required this.name,
+    required this.color,
+    this.category,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -115,6 +145,9 @@ class Category extends DataClass implements Insertable<Category> {
         $CategoriesTable.$convertercolor.toSql(color),
       );
     }
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<int>(category);
+    }
     return map;
   }
 
@@ -123,6 +156,9 @@ class Category extends DataClass implements Insertable<Category> {
       id: Value(id),
       name: Value(name),
       color: Value(color),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
     );
   }
 
@@ -135,6 +171,7 @@ class Category extends DataClass implements Insertable<Category> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       color: serializer.fromJson<Color>(json['color']),
+      category: serializer.fromJson<int?>(json['category']),
     );
   }
   @override
@@ -144,19 +181,27 @@ class Category extends DataClass implements Insertable<Category> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'color': serializer.toJson<Color>(color),
+      'category': serializer.toJson<int?>(category),
     };
   }
 
-  Category copyWith({int? id, String? name, Color? color}) => Category(
+  Category copyWith({
+    int? id,
+    String? name,
+    Color? color,
+    Value<int?> category = const Value.absent(),
+  }) => Category(
     id: id ?? this.id,
     name: name ?? this.name,
     color: color ?? this.color,
+    category: category.present ? category.value : this.category,
   );
   Category copyWithCompanion(CategoriesCompanion data) {
     return Category(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       color: data.color.present ? data.color.value : this.color,
+      category: data.category.present ? data.category.value : this.category,
     );
   }
 
@@ -165,46 +210,53 @@ class Category extends DataClass implements Insertable<Category> {
     return (StringBuffer('Category(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('color: $color')
+          ..write('color: $color, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, color);
+  int get hashCode => Object.hash(id, name, color, category);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Category &&
           other.id == this.id &&
           other.name == this.name &&
-          other.color == this.color);
+          other.color == this.color &&
+          other.category == this.category);
 }
 
 class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<int> id;
   final Value<String> name;
   final Value<Color> color;
+  final Value<int?> category;
   const CategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.color = const Value.absent(),
+    this.category = const Value.absent(),
   });
   CategoriesCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     required Color color,
+    this.category = const Value.absent(),
   }) : name = Value(name),
        color = Value(color);
   static Insertable<Category> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<int>? color,
+    Expression<int>? category,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (color != null) 'color': color,
+      if (category != null) 'category': category,
     });
   }
 
@@ -212,11 +264,13 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Value<int>? id,
     Value<String>? name,
     Value<Color>? color,
+    Value<int?>? category,
   }) {
     return CategoriesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       color: color ?? this.color,
+      category: category ?? this.category,
     );
   }
 
@@ -234,6 +288,9 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
         $CategoriesTable.$convertercolor.toSql(color.value),
       );
     }
+    if (category.present) {
+      map['category'] = Variable<int>(category.value);
+    }
     return map;
   }
 
@@ -242,7 +299,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     return (StringBuffer('CategoriesCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('color: $color')
+          ..write('color: $color, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
@@ -289,8 +347,22 @@ class $TodoEntriesTable extends TodoEntries
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, description, dueDate];
+  late final GeneratedColumn<int> category = GeneratedColumn<int>(
+    'category',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (id)',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, description, dueDate, category];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -323,6 +395,12 @@ class $TodoEntriesTable extends TodoEntries
         dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta),
       );
     }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
     return context;
   }
 
@@ -344,6 +422,10 @@ class $TodoEntriesTable extends TodoEntries
         DriftSqlType.dateTime,
         data['${effectivePrefix}due_date'],
       ),
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}category'],
+      ),
     );
   }
 
@@ -357,7 +439,13 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
   final int id;
   final String description;
   final DateTime? dueDate;
-  const TodoEntry({required this.id, required this.description, this.dueDate});
+  final int? category;
+  const TodoEntry({
+    required this.id,
+    required this.description,
+    this.dueDate,
+    this.category,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -365,6 +453,9 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
     map['description'] = Variable<String>(description);
     if (!nullToAbsent || dueDate != null) {
       map['due_date'] = Variable<DateTime>(dueDate);
+    }
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<int>(category);
     }
     return map;
   }
@@ -376,6 +467,9 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
       dueDate: dueDate == null && nullToAbsent
           ? const Value.absent()
           : Value(dueDate),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
     );
   }
 
@@ -388,6 +482,7 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
       id: serializer.fromJson<int>(json['id']),
       description: serializer.fromJson<String>(json['description']),
       dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
+      category: serializer.fromJson<int?>(json['category']),
     );
   }
   @override
@@ -397,6 +492,7 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
       'id': serializer.toJson<int>(id),
       'description': serializer.toJson<String>(description),
       'dueDate': serializer.toJson<DateTime?>(dueDate),
+      'category': serializer.toJson<int?>(category),
     };
   }
 
@@ -404,10 +500,12 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
     int? id,
     String? description,
     Value<DateTime?> dueDate = const Value.absent(),
+    Value<int?> category = const Value.absent(),
   }) => TodoEntry(
     id: id ?? this.id,
     description: description ?? this.description,
     dueDate: dueDate.present ? dueDate.value : this.dueDate,
+    category: category.present ? category.value : this.category,
   );
   TodoEntry copyWithCompanion(TodoEntriesCompanion data) {
     return TodoEntry(
@@ -416,6 +514,7 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
           ? data.description.value
           : this.description,
       dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
+      category: data.category.present ? data.category.value : this.category,
     );
   }
 
@@ -424,45 +523,52 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
     return (StringBuffer('TodoEntry(')
           ..write('id: $id, ')
           ..write('description: $description, ')
-          ..write('dueDate: $dueDate')
+          ..write('dueDate: $dueDate, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, description, dueDate);
+  int get hashCode => Object.hash(id, description, dueDate, category);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TodoEntry &&
           other.id == this.id &&
           other.description == this.description &&
-          other.dueDate == this.dueDate);
+          other.dueDate == this.dueDate &&
+          other.category == this.category);
 }
 
 class TodoEntriesCompanion extends UpdateCompanion<TodoEntry> {
   final Value<int> id;
   final Value<String> description;
   final Value<DateTime?> dueDate;
+  final Value<int?> category;
   const TodoEntriesCompanion({
     this.id = const Value.absent(),
     this.description = const Value.absent(),
     this.dueDate = const Value.absent(),
+    this.category = const Value.absent(),
   });
   TodoEntriesCompanion.insert({
     this.id = const Value.absent(),
     required String description,
     this.dueDate = const Value.absent(),
+    this.category = const Value.absent(),
   }) : description = Value(description);
   static Insertable<TodoEntry> custom({
     Expression<int>? id,
     Expression<String>? description,
     Expression<DateTime>? dueDate,
+    Expression<int>? category,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (description != null) 'description': description,
       if (dueDate != null) 'due_date': dueDate,
+      if (category != null) 'category': category,
     });
   }
 
@@ -470,11 +576,13 @@ class TodoEntriesCompanion extends UpdateCompanion<TodoEntry> {
     Value<int>? id,
     Value<String>? description,
     Value<DateTime?>? dueDate,
+    Value<int?>? category,
   }) {
     return TodoEntriesCompanion(
       id: id ?? this.id,
       description: description ?? this.description,
       dueDate: dueDate ?? this.dueDate,
+      category: category ?? this.category,
     );
   }
 
@@ -490,6 +598,9 @@ class TodoEntriesCompanion extends UpdateCompanion<TodoEntry> {
     if (dueDate.present) {
       map['due_date'] = Variable<DateTime>(dueDate.value);
     }
+    if (category.present) {
+      map['category'] = Variable<int>(category.value);
+    }
     return map;
   }
 
@@ -498,7 +609,8 @@ class TodoEntriesCompanion extends UpdateCompanion<TodoEntry> {
     return (StringBuffer('TodoEntriesCompanion(')
           ..write('id: $id, ')
           ..write('description: $description, ')
-          ..write('dueDate: $dueDate')
+          ..write('dueDate: $dueDate, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
@@ -521,13 +633,57 @@ typedef $$CategoriesTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       required Color color,
+      Value<int?> category,
     });
 typedef $$CategoriesTableUpdateCompanionBuilder =
     CategoriesCompanion Function({
       Value<int> id,
       Value<String> name,
       Value<Color> color,
+      Value<int?> category,
     });
+
+final class $$CategoriesTableReferences
+    extends BaseReferences<_$AppDatabase, $CategoriesTable, Category> {
+  $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CategoriesTable _categoryTable(_$AppDatabase db) =>
+      db.categories.createAlias(
+        $_aliasNameGenerator(db.categories.category, db.categories.id),
+      );
+
+  $$CategoriesTableProcessedTableManager? get category {
+    final $_column = $_itemColumn<int>('category');
+    if ($_column == null) return null;
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$TodoEntriesTable, List<TodoEntry>>
+  _todoEntriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.todoEntries,
+    aliasName: $_aliasNameGenerator(db.categories.id, db.todoEntries.category),
+  );
+
+  $$TodoEntriesTableProcessedTableManager get todoEntriesRefs {
+    final manager = $$TodoEntriesTableTableManager(
+      $_db,
+      $_db.todoEntries,
+    ).filter((f) => f.category.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_todoEntriesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$CategoriesTableFilterComposer
     extends Composer<_$AppDatabase, $CategoriesTable> {
@@ -553,6 +709,54 @@ class $$CategoriesTableFilterComposer
         column: $table.color,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
+
+  $$CategoriesTableFilterComposer get category {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> todoEntriesRefs(
+    Expression<bool> Function($$TodoEntriesTableFilterComposer f) f,
+  ) {
+    final $$TodoEntriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.todoEntries,
+      getReferencedColumn: (t) => t.category,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TodoEntriesTableFilterComposer(
+            $db: $db,
+            $table: $db.todoEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableOrderingComposer
@@ -578,6 +782,29 @@ class $$CategoriesTableOrderingComposer
     column: $table.color,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$CategoriesTableOrderingComposer get category {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$CategoriesTableAnnotationComposer
@@ -597,6 +824,54 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<Color, int> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
+
+  $$CategoriesTableAnnotationComposer get category {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> todoEntriesRefs<T extends Object>(
+    Expression<T> Function($$TodoEntriesTableAnnotationComposer a) f,
+  ) {
+    final $$TodoEntriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.todoEntries,
+      getReferencedColumn: (t) => t.category,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TodoEntriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.todoEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableTableManager
@@ -610,9 +885,9 @@ class $$CategoriesTableTableManager
           $$CategoriesTableAnnotationComposer,
           $$CategoriesTableCreateCompanionBuilder,
           $$CategoriesTableUpdateCompanionBuilder,
-          (Category, BaseReferences<_$AppDatabase, $CategoriesTable, Category>),
+          (Category, $$CategoriesTableReferences),
           Category,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool category, bool todoEntriesRefs})
         > {
   $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
     : super(
@@ -630,18 +905,94 @@ class $$CategoriesTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<Color> color = const Value.absent(),
-              }) => CategoriesCompanion(id: id, name: name, color: color),
+                Value<int?> category = const Value.absent(),
+              }) => CategoriesCompanion(
+                id: id,
+                name: name,
+                color: color,
+                category: category,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
                 required Color color,
-              }) =>
-                  CategoriesCompanion.insert(id: id, name: name, color: color),
+                Value<int?> category = const Value.absent(),
+              }) => CategoriesCompanion.insert(
+                id: id,
+                name: name,
+                color: color,
+                category: category,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CategoriesTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({category = false, todoEntriesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (todoEntriesRefs) db.todoEntries],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (category) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.category,
+                                referencedTable: $$CategoriesTableReferences
+                                    ._categoryTable(db),
+                                referencedColumn: $$CategoriesTableReferences
+                                    ._categoryTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (todoEntriesRefs)
+                    await $_getPrefetchedData<
+                      Category,
+                      $CategoriesTable,
+                      TodoEntry
+                    >(
+                      currentTable: table,
+                      referencedTable: $$CategoriesTableReferences
+                          ._todoEntriesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$CategoriesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).todoEntriesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.category == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -656,22 +1007,48 @@ typedef $$CategoriesTableProcessedTableManager =
       $$CategoriesTableAnnotationComposer,
       $$CategoriesTableCreateCompanionBuilder,
       $$CategoriesTableUpdateCompanionBuilder,
-      (Category, BaseReferences<_$AppDatabase, $CategoriesTable, Category>),
+      (Category, $$CategoriesTableReferences),
       Category,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool category, bool todoEntriesRefs})
     >;
 typedef $$TodoEntriesTableCreateCompanionBuilder =
     TodoEntriesCompanion Function({
       Value<int> id,
       required String description,
       Value<DateTime?> dueDate,
+      Value<int?> category,
     });
 typedef $$TodoEntriesTableUpdateCompanionBuilder =
     TodoEntriesCompanion Function({
       Value<int> id,
       Value<String> description,
       Value<DateTime?> dueDate,
+      Value<int?> category,
     });
+
+final class $$TodoEntriesTableReferences
+    extends BaseReferences<_$AppDatabase, $TodoEntriesTable, TodoEntry> {
+  $$TodoEntriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CategoriesTable _categoryTable(_$AppDatabase db) =>
+      db.categories.createAlias(
+        $_aliasNameGenerator(db.todoEntries.category, db.categories.id),
+      );
+
+  $$CategoriesTableProcessedTableManager? get category {
+    final $_column = $_itemColumn<int>('category');
+    if ($_column == null) return null;
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
 
 class $$TodoEntriesTableFilterComposer
     extends Composer<_$AppDatabase, $TodoEntriesTable> {
@@ -696,6 +1073,29 @@ class $$TodoEntriesTableFilterComposer
     column: $table.dueDate,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$CategoriesTableFilterComposer get category {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$TodoEntriesTableOrderingComposer
@@ -721,6 +1121,29 @@ class $$TodoEntriesTableOrderingComposer
     column: $table.dueDate,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$CategoriesTableOrderingComposer get category {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$TodoEntriesTableAnnotationComposer
@@ -742,6 +1165,29 @@ class $$TodoEntriesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get dueDate =>
       $composableBuilder(column: $table.dueDate, builder: (column) => column);
+
+  $$CategoriesTableAnnotationComposer get category {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$TodoEntriesTableTableManager
@@ -755,12 +1201,9 @@ class $$TodoEntriesTableTableManager
           $$TodoEntriesTableAnnotationComposer,
           $$TodoEntriesTableCreateCompanionBuilder,
           $$TodoEntriesTableUpdateCompanionBuilder,
-          (
-            TodoEntry,
-            BaseReferences<_$AppDatabase, $TodoEntriesTable, TodoEntry>,
-          ),
+          (TodoEntry, $$TodoEntriesTableReferences),
           TodoEntry,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool category})
         > {
   $$TodoEntriesTableTableManager(_$AppDatabase db, $TodoEntriesTable table)
     : super(
@@ -778,25 +1221,74 @@ class $$TodoEntriesTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> description = const Value.absent(),
                 Value<DateTime?> dueDate = const Value.absent(),
+                Value<int?> category = const Value.absent(),
               }) => TodoEntriesCompanion(
                 id: id,
                 description: description,
                 dueDate: dueDate,
+                category: category,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String description,
                 Value<DateTime?> dueDate = const Value.absent(),
+                Value<int?> category = const Value.absent(),
               }) => TodoEntriesCompanion.insert(
                 id: id,
                 description: description,
                 dueDate: dueDate,
+                category: category,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$TodoEntriesTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({category = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (category) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.category,
+                                referencedTable: $$TodoEntriesTableReferences
+                                    ._categoryTable(db),
+                                referencedColumn: $$TodoEntriesTableReferences
+                                    ._categoryTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -811,9 +1303,9 @@ typedef $$TodoEntriesTableProcessedTableManager =
       $$TodoEntriesTableAnnotationComposer,
       $$TodoEntriesTableCreateCompanionBuilder,
       $$TodoEntriesTableUpdateCompanionBuilder,
-      (TodoEntry, BaseReferences<_$AppDatabase, $TodoEntriesTable, TodoEntry>),
+      (TodoEntry, $$TodoEntriesTableReferences),
       TodoEntry,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool category})
     >;
 
 class $AppDatabaseManager {
