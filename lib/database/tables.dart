@@ -18,6 +18,8 @@ class Categories extends Table with AutoIncrementPrimaryKey {
   TextColumn get name => text().unique()();
 
   IntColumn get color => integer().map(ColorConverter())();
+
+  IntColumn get category => integer().nullable().references(Categories, #id)();
 }
 
 class ColorConverter extends TypeConverter<Color, int> {
