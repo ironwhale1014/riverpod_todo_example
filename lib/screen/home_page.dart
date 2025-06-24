@@ -12,14 +12,24 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultLayout(
       title: '홈',
-      child: TextFormField(
-        controller: controller,
-        onFieldSubmitted: (_) {
-          ref
-              .read(todoServiceProvider.notifier)
-              .saveTodo(controller.text.trim());
-          controller.clear();
-        },
+      child: Column(
+        children: [
+          TextFormField(
+            controller: controller,
+            onFieldSubmitted: (_) {
+              ref
+                  .read(todoServiceProvider.notifier)
+                  .saveTodo(controller.text.trim());
+              controller.clear();
+            },
+          ),
+          TextButton(
+            onPressed: () async {
+              await ref.read(todoServiceProvider.notifier).getTodos();
+            },
+            child: Text("Button"),
+          ),
+        ],
       ),
     );
   }

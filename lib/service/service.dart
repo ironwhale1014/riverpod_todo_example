@@ -19,4 +19,8 @@ class TodoService extends _$TodoService {
       TodoEntriesCompanion.insert(description: description),
     );
   }
+
+  Future<List<TodoEntry>> getTodos() async {
+    return await _database.select(_database.todoEntries).get();
+  }
 }

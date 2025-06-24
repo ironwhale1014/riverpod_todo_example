@@ -37,7 +37,7 @@ final class TodoServiceProvider extends $NotifierProvider<TodoService, void> {
   }
 }
 
-String _$todoServiceHash() => r'8df8aa0cb2c4585ab7547221ec46475e0b2871a0';
+String _$todoServiceHash() => r'f22da0783ba8b2f1cef9c02e46456a186e919e9a';
 
 abstract class _$TodoService extends $Notifier<void> {
   void build();
