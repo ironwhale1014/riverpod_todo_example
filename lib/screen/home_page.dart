@@ -1,8 +1,11 @@
 import 'package:drift_todo_train/common/layout/default_layout.dart';
-import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/database/todo_service.dart';
+import 'package:drift_todo_train/model/todo_with_category.dart';
+import 'package:drift_todo_train/provider/todo_with_catgory_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import 'components/todo_card.dart';
 
 class HomePage extends ConsumerWidget {
   HomePage({super.key});
@@ -11,45 +14,59 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    void addTodo() {
+      if (controller.text.isNotEmpty) {
+        final categoryId = ref.read(categoryStateProvider)?.id;
+        ref
+            .read(todoServiceProvider.notifier)
+            .todoSave(
+              description: controller.text.trim(),
+              categoryId: categoryId,
+            );
+        controller.clear();
+      }
+    }
+
     return DefaultLayout(
       title: 'Home Page',
-      child: Column(
-        children: [
-          TextFormField(
-            controller: controller,
-            onFieldSubmitted: (_) {
-              if (controller.text.isNotEmpty) {
-                ref
-                    .read(todoServiceProvider.notifier)
-                    .todoSave(description: controller.text.trim());
-                controller.clear();
-              }
-            },
-          ),
-          Expanded(
-            child: StreamBuilder(
-              stream: ref.watch(todoServiceProvider.notifier).getTodoEntries(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final List<TodoEntry> todoEntries = snapshot.data!;
-
-                  return ListView.builder(
-                    itemCount: todoEntries.length,
-                    itemBuilder: (context, index) {
-                      final todoEntry = todoEntries[index];
-                      return ListTile(
-                        title: Text(todoEntry.description),
-                        trailing: Text(todoEntry.dueDate?.toString() ?? 'null'),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            TextFormField(
+              controller: controller,
+              onFieldSubmitted: (_) => addTodo(),
+            ),
+            Expanded(
+              child: ref
+                  .watch(getTodoWithCategoryProvider)
+                  .when(
+                    data: (List<TodoWithCategory> todoWithCategories) {
+                      return ListView.builder(
+                        itemCount: todoWithCategories.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return ProviderScope(
+                            overrides: [
+                              currentTodo.overrideWithValue(
+                                todoWithCategories[index],
+                              ),
+                            ],
+                            child: const TodoCard(),
+                          );
+                        },
                       );
                     },
-                  );
-                }
-                return Text("no data");
-              },
+                    error: (e, _) => Text(e.toString()),
+                    loading: () => Center(child: CircularProgressIndicator()),
+                  ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+
+final currentTodo = Provider<TodoWithCategory>(
+  (ref) => throw UnimplementedError(),
+);
