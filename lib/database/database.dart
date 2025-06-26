@@ -16,14 +16,15 @@ class DatabaseState extends _$DatabaseState {
 
 @DriftDatabase(tables: [Categories, TodoEntries])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase()
+  AppDatabase([QueryExecutor? e])
     : super(
-        LazyDatabase(() async {
-          final file = await getDbFile;
-          return NativeDatabase.createInBackground(file);
-        }),
+        e ??
+            LazyDatabase(() async {
+              final file = await getDbFile;
+              return NativeDatabase.createInBackground(file);
+            }),
       );
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 }
