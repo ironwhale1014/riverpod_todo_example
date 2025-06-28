@@ -20,8 +20,7 @@ class CategoryState extends _$CategoryState {
 
 @riverpod
 Stream<List<TodoWithCategory>> getTodoWithCategory(Ref ref) {
+  final todoService = ref.watch(todoServiceProvider.notifier);
   final int? categoryId = ref.watch(categoryStateProvider)?.id;
-  return ref
-      .watch(todoServiceProvider.notifier)
-      .getTodoWithCategory(categoryId: categoryId);
+  return todoService.getTodoWithCategory(categoryId: categoryId);
 }

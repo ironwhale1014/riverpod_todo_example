@@ -7,12 +7,9 @@ part 'todo_service.g.dart';
 
 @riverpod
 class TodoService extends _$TodoService {
-  late final AppDatabase _database;
-
   @override
-  void build() {
-    _database = ref.watch(databaseStateProvider);
-    return;
+  AppDatabase build() {
+    return ref.watch(appDatabaseProvider);
   }
 
   void todoSave({
@@ -20,7 +17,7 @@ class TodoService extends _$TodoService {
     DateTime? dueDate,
     int? categoryId,
   }) async {
-    await _database.todoEntries.insertOne(
+    await state.todoEntries.insertOne(
       TodoEntriesCompanion.insert(
         description: description,
         dueDate: Value(dueDate),
@@ -30,48 +27,45 @@ class TodoService extends _$TodoService {
   }
 
   void todoDelete(TodoEntry todoEntry) async {
-    await _database.todoEntries.deleteOne(todoEntry);
+    await state.todoEntries.deleteOne(todoEntry);
   }
 
   void todoUpdate(TodoEntry todoEntry) async {
-    await _database.todoEntries.replaceOne(todoEntry);
+    await state.todoEntries.replaceOne(todoEntry);
   }
 
   Stream<List<TodoEntry>> getTodoEntries() {
-    return _database.todoEntries.select().watch();
+    return state.todoEntries.select().watch();
   }
 
   Stream<List<TodoWithCategory>> getTodoWithCategory({int? categoryId}) {
-    final query = _database.todoEntries.select().join([
+    final query = state.todoEntries.select().join([
       leftOuterJoin(
-        _database.categories,
-        _database.categories.id.equalsExp(_database.todoEntries.category),
+        state.categories,
+        state.categories.id.equalsExp(state.todoEntries.category),
       ),
     ]);
 
     if (categoryId != null) {
-      query.where(_database.categories.id.equals(categoryId));
+      query.where(state.categories.id.equals(categoryId));
     } else {
-      query.where(_database.categories.id.isNull());
+      query.where(state.categories.id.isNull());
     }
 
     return query
         .map(
           (row) => TodoWithCategory(
-            todoEntry: row.readTable(_database.todoEntries),
-            category: row.readTableOrNull(_database.categories),
+            todoEntry: row.readTable(state.todoEntries),
+            category: row.readTableOrNull(state.categories),
           ),
         )
         .watch();
   }
 
   Future<List<TodoWithCategory>> searchTodos(String query) async {
-    final results = await _database.searchTodos(query).get();
+    final results = await state.searchTodos(query).get();
     return results
-        .map((row) => TodoWithCategory(
-              todoEntry: row.t,
-              category: row.c,
-            ))
+        .map((row) => TodoWithCategory(todoEntry: row.t, category: row.c))
         .toList();
   }
 }

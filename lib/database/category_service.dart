@@ -15,7 +15,7 @@ class CategoryService extends _$CategoryService {
 
   @override
   void build() {
-    _database = ref.watch(databaseStateProvider);
+    _database = ref.watch(appDatabaseProvider);
     return;
   }
 

@@ -45,6 +45,8 @@ dependencies:
   hooks_riverpod: ^2.6.1
   flutter_hooks: ^0.21.2
   riverpod_annotation: ^2.6.1
+  sqlite3:
+  sqlite3_flutter_libs:
 
 dev_dependencies:
   flutter_test:

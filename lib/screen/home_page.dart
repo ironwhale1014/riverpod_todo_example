@@ -1,4 +1,5 @@
 import 'package:drift_todo_train/common/layout/default_layout.dart';
+import 'package:drift_todo_train/common/util/logger.dart';
 import 'package:drift_todo_train/database/todo_service.dart';
 import 'package:drift_todo_train/model/todo_with_category.dart';
 import 'package:drift_todo_train/provider/todo_with_catgory_provider.dart';
@@ -55,6 +56,7 @@ class HomePage extends ConsumerWidget {
                   .watch(getTodoWithCategoryProvider)
                   .when(
                     data: (List<TodoWithCategory> todoWithCategories) {
+                      logger.d(todoWithCategories.length);
                       return ListView.builder(
                         itemCount: todoWithCategories.length,
                         itemBuilder: (BuildContext context, int index) {
