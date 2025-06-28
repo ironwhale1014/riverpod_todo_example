@@ -17,7 +17,7 @@ class DatabaseState extends _$DatabaseState {
   }
 }
 
-@DriftDatabase(tables: [Categories, TodoEntries])
+@DriftDatabase(tables: [Categories, TodoEntries], include: {'sql.drift'})
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e])
     : super(

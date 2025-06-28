@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   intl:
   path:
+  flutter_colorpicker:
   logger: ^2.6.0
   go_router: ^15.2.4
   drift: ^2.26.1

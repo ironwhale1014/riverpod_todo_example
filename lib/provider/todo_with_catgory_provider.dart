@@ -12,6 +12,10 @@ class CategoryState extends _$CategoryState {
   Category? build() {
     return null;
   }
+
+  void setCategory(Category? category) {
+    state = category;
+  }
 }
 
 @riverpod

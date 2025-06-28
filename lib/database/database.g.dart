@@ -562,6 +562,24 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $TodoEntriesTable todoEntries = $TodoEntriesTable(this);
+  Selectable<GetCategoriesWithCountResult> getCategoriesWithCount() {
+    return customSelect(
+      'SELECT c.*, (SELECT COUNT(*) FROM todo_entries WHERE todo_entries.category = c.id) AS amount FROM categories AS c UNION ALL SELECT NULL, NULL, NULL, (SELECT COUNT(*) FROM todo_entries WHERE todo_entries.category IS NULL)',
+      variables: [],
+      readsFrom: {todoEntries, categories},
+    ).map(
+      (QueryRow row) => GetCategoriesWithCountResult(
+        id: row.readNullable<int>('id'),
+        name: row.readNullable<String>('name'),
+        color: NullAwareTypeConverter.wrapFromSql(
+          $CategoriesTable.$convertercolor,
+          row.readNullable<int>('color'),
+        ),
+        amount: row.read<int>('amount'),
+      ),
+    );
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1124,6 +1142,19 @@ class $AppDatabaseManager {
       $$CategoriesTableTableManager(_db, _db.categories);
   $$TodoEntriesTableTableManager get todoEntries =>
       $$TodoEntriesTableTableManager(_db, _db.todoEntries);
+}
+
+class GetCategoriesWithCountResult {
+  final int? id;
+  final String? name;
+  final Color? color;
+  final int amount;
+  GetCategoriesWithCountResult({
+    this.id,
+    this.name,
+    this.color,
+    required this.amount,
+  });
 }
 
 // **************************************************************************

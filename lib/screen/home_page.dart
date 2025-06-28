@@ -2,9 +2,11 @@ import 'package:drift_todo_train/common/layout/default_layout.dart';
 import 'package:drift_todo_train/database/todo_service.dart';
 import 'package:drift_todo_train/model/todo_with_category.dart';
 import 'package:drift_todo_train/provider/todo_with_catgory_provider.dart';
+import 'package:drift_todo_train/screen/components/category_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import 'backup/backup.dart';
 import 'components/todo_card.dart';
 
 class HomePage extends ConsumerWidget {
@@ -29,6 +31,10 @@ class HomePage extends ConsumerWidget {
 
     return DefaultLayout(
       title: 'Home Page',
+      drawer: CategoryDrawer(),
+      actions: [
+        BackUpButton(),
+      ],
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
