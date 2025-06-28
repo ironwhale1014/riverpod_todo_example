@@ -37,6 +37,8 @@ dependencies:
   intl:
   path:
   flutter_colorpicker:
+  sqlite3:
+  sqlite3_flutter_libs:
   logger: ^2.6.0
   go_router: ^15.2.4
   drift: ^2.26.1

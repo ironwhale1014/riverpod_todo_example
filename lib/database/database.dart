@@ -15,6 +15,12 @@ class DatabaseState extends _$DatabaseState {
   AppDatabase build() {
     return AppDatabase();
   }
+
+  void restartDb() async {
+    final old = state;
+    await old.close();
+    state = AppDatabase();
+  }
 }
 
 @DriftDatabase(tables: [Categories, TodoEntries], include: {'sql.drift'})
