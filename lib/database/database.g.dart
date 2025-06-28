@@ -1534,7 +1534,7 @@ class GetCategoriesWithCountResult {
 // RiverpodGenerator
 // **************************************************************************
 
-String _$databaseStateHash() => r'a2beff308593bade775704db933f8cd445ec3ea0';
+String _$databaseStateHash() => r'70698b595cb02576636225c95a92b409fdeef6c4';
 
 /// See also [DatabaseState].
 @ProviderFor(DatabaseState)

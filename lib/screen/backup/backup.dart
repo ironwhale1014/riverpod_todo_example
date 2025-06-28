@@ -2,11 +2,14 @@ import 'dart:io';
 
 import 'package:drift_todo_train/common/util/get_db_file.dart';
 import 'package:drift_todo_train/database/database.dart';
+import 'package:drift_todo_train/database/todo_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
+
+import 'package:drift_todo_train/provider/todo_with_catgory_provider.dart';
 
 class BackUpButton extends ConsumerWidget {
   const BackUpButton({super.key});
@@ -35,9 +38,6 @@ class _BackUpDialog extends ConsumerWidget {
         ),
         TextButton(
           onPressed: () async {
-            final db = ref.read(databaseStateProvider);
-            await db.close();
-
             final directory = await getApplicationDocumentsDirectory();
             final backupDirectory = Directory(p.join(directory.path, 'backup'));
             final backUpFile = File(
@@ -65,7 +65,12 @@ class _BackUpDialog extends ConsumerWidget {
             await tempDbFile.copy(mainDbFile.path);
             await tempDbFile.delete();
 
-            ref.read(databaseStateProvider.notifier).restartDb();
+            // Invalidate the database provider to force a new connection
+            ref.invalidate(databaseStateProvider);
+            // Invalidate the todo service provider to ensure it uses the new database instance
+            ref.invalidate(todoServiceProvider);
+            // Invalidate the todo list provider to refresh the UI
+            ref.invalidate(getTodoWithCategoryProvider);
 
             if (context.mounted) {
               ScaffoldMessenger.of(
