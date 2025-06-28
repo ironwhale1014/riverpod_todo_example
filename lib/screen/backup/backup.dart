@@ -2,15 +2,13 @@ import 'dart:io';
 
 import 'package:drift_todo_train/common/util/get_db_file.dart';
 import 'package:drift_todo_train/database/database.dart';
-import 'package:drift_todo_train/database/todo_service.dart';
+import 'package:drift_todo_train/provider/todo_with_catgory_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
-
-import '../../common/util/logger.dart';
 
 class BackUpButton extends ConsumerWidget {
   const BackUpButton({super.key});
@@ -43,56 +41,65 @@ class _BackUpDialog extends ConsumerWidget {
     );
   }
 
-  _restore(BuildContext context, WidgetRef ref) async {
-    context.pop();
-    final folder = await getApplicationDocumentsDirectory();
-    final backupFolder = Directory(p.join(folder.path, 'backup'));
-    final backUpFile = File(p.join(backupFolder.path, 'backup2.db'));
-
-    if (!backupFolder.existsSync()) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('not found backup DB')));
-      }
-      return;
-    }
-    final tempDbFolderPath = (await getTemporaryDirectory()).path;
-    final tempDbFile = File(p.join(tempDbFolderPath, 'tempDb.db'));
-
-    final backDb = sqlite3.open(backUpFile.path);
-
-    backDb
-      ..execute('VACUUM INTO ?', [tempDbFile.path])
-      ..dispose();
-    await tempDbFile.copy((await getDbFile).path);
-    tempDbFile.deleteSync();
-    //
-    ref.invalidate(appDatabaseProvider);
-    ref.invalidate(todoServiceProvider);
-    logger.d("dd");
-  }
-
   _createBackup(BuildContext context, WidgetRef ref) async {
     context.pop();
-    final folder = await getApplicationDocumentsDirectory();
-    final backupFolder = Directory(p.join(folder.path, 'backup'));
-    if (!backupFolder.existsSync()) {
-      backupFolder.createSync(recursive: true);
-    }
-    final backUpFile = File(p.join(backupFolder.path, 'backup2.db'));
-
+    final backUpFile = await _getBackupFile;
     if (backUpFile.existsSync()) {
       backUpFile.deleteSync();
     }
-
-    ref.read(appDatabaseProvider).customStatement('VACUUM INTO ? ', [
+    ref.read(appDatabaseProvider).customStatement('VACUUM INTO ?', [
       backUpFile.path,
     ]);
+
     if (context.mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('back up success')));
+      ).showSnackBar(SnackBar(content: Text("backUp end")));
     }
+  }
+
+  _restore(BuildContext context, WidgetRef ref) async {
+    context.pop();
+    final db = ref.read(appDatabaseProvider);
+    await db.close();
+    final backUpFile = await _getBackupFile;
+    if (!backUpFile.existsSync()) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("backUp file not found")));
+      }
+      return;
+    }
+    final tempFile = File(
+      p.join((await getTemporaryDirectory()).path, 'temp.db'),
+    );
+    final backupDb = sqlite3.open(backUpFile.path);
+    backupDb
+      ..execute('VACUUM INTO ?', [tempFile.path])
+      ..dispose();
+
+    final dbFile = await getDbFile;
+    tempFile.copySync(dbFile.path);
+    tempFile.deleteSync();
+
+    ref.invalidate(appDatabaseProvider);
+    ref.invalidate(getTodoWithCategoryProvider);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("backUp end")));
+    }
+  }
+
+  Future<File> get _getBackupFile async {
+    final dir = await getApplicationDocumentsDirectory();
+    final backUpFolder = Directory(p.join(dir.path, 'backup'));
+    if (!backUpFolder.existsSync()) {
+      backUpFolder.createSync(recursive: true);
+    }
+
+    return File(p.join(backUpFolder.path, 'backup3.db'));
   }
 }
