@@ -4,6 +4,7 @@ import 'package:drift_todo_train/model/todo_with_category.dart';
 import 'package:drift_todo_train/provider/todo_with_catgory_provider.dart';
 import 'package:drift_todo_train/screen/components/category_drawer.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'backup/backup.dart';
@@ -33,6 +34,12 @@ class HomePage extends ConsumerWidget {
       title: 'Home Page',
       drawer: CategoryDrawer(),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () {
+            context.pushNamed('search');
+          },
+        ),
         BackUpButton(),
       ],
       child: Padding(
@@ -63,7 +70,8 @@ class HomePage extends ConsumerWidget {
                       );
                     },
                     error: (e, _) => Text(e.toString()),
-                    loading: () => Center(child: CircularProgressIndicator()),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
                   ),
             ),
           ],

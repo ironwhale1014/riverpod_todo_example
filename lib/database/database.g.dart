@@ -557,11 +557,219 @@ class TodoEntriesCompanion extends UpdateCompanion<TodoEntry> {
   }
 }
 
+class TodoEntriesFts extends Table
+    with
+        TableInfo<TodoEntriesFts, TodoEntriesFt>,
+        VirtualTableInfo<TodoEntriesFts, TodoEntriesFt> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  TodoEntriesFts(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: '',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [description];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'todo_entries_fts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TodoEntriesFt> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  TodoEntriesFt map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TodoEntriesFt(
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+    );
+  }
+
+  @override
+  TodoEntriesFts createAlias(String alias) {
+    return TodoEntriesFts(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+  @override
+  String get moduleAndArgs =>
+      'fts5(description, content=todo_entries, content_rowid=id)';
+}
+
+class TodoEntriesFt extends DataClass implements Insertable<TodoEntriesFt> {
+  final String description;
+  const TodoEntriesFt({required this.description});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['description'] = Variable<String>(description);
+    return map;
+  }
+
+  TodoEntriesFtsCompanion toCompanion(bool nullToAbsent) {
+    return TodoEntriesFtsCompanion(description: Value(description));
+  }
+
+  factory TodoEntriesFt.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TodoEntriesFt(
+      description: serializer.fromJson<String>(json['description']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'description': serializer.toJson<String>(description),
+    };
+  }
+
+  TodoEntriesFt copyWith({String? description}) =>
+      TodoEntriesFt(description: description ?? this.description);
+  TodoEntriesFt copyWithCompanion(TodoEntriesFtsCompanion data) {
+    return TodoEntriesFt(
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TodoEntriesFt(')
+          ..write('description: $description')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => description.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TodoEntriesFt && other.description == this.description);
+}
+
+class TodoEntriesFtsCompanion extends UpdateCompanion<TodoEntriesFt> {
+  final Value<String> description;
+  final Value<int> rowid;
+  const TodoEntriesFtsCompanion({
+    this.description = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TodoEntriesFtsCompanion.insert({
+    required String description,
+    this.rowid = const Value.absent(),
+  }) : description = Value(description);
+  static Insertable<TodoEntriesFt> custom({
+    Expression<String>? description,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (description != null) 'description': description,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TodoEntriesFtsCompanion copyWith({
+    Value<String>? description,
+    Value<int>? rowid,
+  }) {
+    return TodoEntriesFtsCompanion(
+      description: description ?? this.description,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TodoEntriesFtsCompanion(')
+          ..write('description: $description, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $TodoEntriesTable todoEntries = $TodoEntriesTable(this);
+  late final TodoEntriesFts todoEntriesFts = TodoEntriesFts(this);
+  late final Trigger todoEntriesAi = Trigger(
+    'CREATE TRIGGER todo_entries_ai AFTER INSERT ON todo_entries BEGIN INSERT INTO todo_entries_fts ("rowid", description) VALUES (new.id, new.description);END',
+    'todo_entries_ai',
+  );
+  late final Trigger todoEntriesAd = Trigger(
+    'CREATE TRIGGER todo_entries_ad AFTER DELETE ON todo_entries BEGIN INSERT INTO todo_entries_fts (todo_entries_fts, "rowid", description) VALUES (\'delete\', old.id, old.description);END',
+    'todo_entries_ad',
+  );
+  late final Trigger todoEntriesAu = Trigger(
+    'CREATE TRIGGER todo_entries_au AFTER UPDATE ON todo_entries BEGIN INSERT INTO todo_entries_fts (todo_entries_fts, "rowid", description) VALUES (\'delete\', old.id, old.description);INSERT INTO todo_entries_fts ("rowid", description) VALUES (new.id, new.description);END',
+    'todo_entries_au',
+  );
+  Selectable<SearchTodosResult> searchTodos(String query) {
+    return customSelect(
+      'SELECT"t"."id" AS "nested_0.id", "t"."description" AS "nested_0.description", "t"."due_date" AS "nested_0.due_date", "t"."category" AS "nested_0.category","c"."id" AS "nested_1.id", "c"."name" AS "nested_1.name", "c"."color" AS "nested_1.color" FROM todo_entries_fts AS fts INNER JOIN todo_entries AS t ON t.id = fts."rowid" LEFT JOIN categories AS c ON c.id = t.category WHERE todo_entries_fts MATCH ?1',
+      variables: [Variable<String>(query)],
+      readsFrom: {todoEntriesFts, todoEntries, categories},
+    ).asyncMap(
+      (QueryRow row) async => SearchTodosResult(
+        t: await todoEntries.mapFromRow(row, tablePrefix: 'nested_0'),
+        c: await categories.mapFromRowOrNull(row, tablePrefix: 'nested_1'),
+      ),
+    );
+  }
+
   Selectable<GetCategoriesWithCountResult> getCategoriesWithCount() {
     return customSelect(
       'SELECT c.*, (SELECT COUNT(*) FROM todo_entries WHERE todo_entries.category = c.id) AS amount FROM categories AS c UNION ALL SELECT NULL, NULL, NULL, (SELECT COUNT(*) FROM todo_entries WHERE todo_entries.category IS NULL)',
@@ -584,7 +792,38 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [categories, todoEntries];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    categories,
+    todoEntries,
+    todoEntriesFts,
+    todoEntriesAi,
+    todoEntriesAd,
+    todoEntriesAu,
+  ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'todo_entries',
+        limitUpdateKind: UpdateKind.insert,
+      ),
+      result: [TableUpdate('todo_entries_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'todo_entries',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('todo_entries_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'todo_entries',
+        limitUpdateKind: UpdateKind.update,
+      ),
+      result: [TableUpdate('todo_entries_fts', kind: UpdateKind.insert)],
+    ),
+  ]);
 }
 
 typedef $$CategoriesTableCreateCompanionBuilder =
@@ -1134,6 +1373,132 @@ typedef $$TodoEntriesTableProcessedTableManager =
       TodoEntry,
       PrefetchHooks Function({bool category})
     >;
+typedef $TodoEntriesFtsCreateCompanionBuilder =
+    TodoEntriesFtsCompanion Function({
+      required String description,
+      Value<int> rowid,
+    });
+typedef $TodoEntriesFtsUpdateCompanionBuilder =
+    TodoEntriesFtsCompanion Function({
+      Value<String> description,
+      Value<int> rowid,
+    });
+
+class $TodoEntriesFtsFilterComposer
+    extends Composer<_$AppDatabase, TodoEntriesFts> {
+  $TodoEntriesFtsFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $TodoEntriesFtsOrderingComposer
+    extends Composer<_$AppDatabase, TodoEntriesFts> {
+  $TodoEntriesFtsOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $TodoEntriesFtsAnnotationComposer
+    extends Composer<_$AppDatabase, TodoEntriesFts> {
+  $TodoEntriesFtsAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+}
+
+class $TodoEntriesFtsTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          TodoEntriesFts,
+          TodoEntriesFt,
+          $TodoEntriesFtsFilterComposer,
+          $TodoEntriesFtsOrderingComposer,
+          $TodoEntriesFtsAnnotationComposer,
+          $TodoEntriesFtsCreateCompanionBuilder,
+          $TodoEntriesFtsUpdateCompanionBuilder,
+          (
+            TodoEntriesFt,
+            BaseReferences<_$AppDatabase, TodoEntriesFts, TodoEntriesFt>,
+          ),
+          TodoEntriesFt,
+          PrefetchHooks Function()
+        > {
+  $TodoEntriesFtsTableManager(_$AppDatabase db, TodoEntriesFts table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $TodoEntriesFtsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $TodoEntriesFtsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $TodoEntriesFtsAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> description = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TodoEntriesFtsCompanion(
+                description: description,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String description,
+                Value<int> rowid = const Value.absent(),
+              }) => TodoEntriesFtsCompanion.insert(
+                description: description,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $TodoEntriesFtsProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      TodoEntriesFts,
+      TodoEntriesFt,
+      $TodoEntriesFtsFilterComposer,
+      $TodoEntriesFtsOrderingComposer,
+      $TodoEntriesFtsAnnotationComposer,
+      $TodoEntriesFtsCreateCompanionBuilder,
+      $TodoEntriesFtsUpdateCompanionBuilder,
+      (
+        TodoEntriesFt,
+        BaseReferences<_$AppDatabase, TodoEntriesFts, TodoEntriesFt>,
+      ),
+      TodoEntriesFt,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1142,6 +1507,14 @@ class $AppDatabaseManager {
       $$CategoriesTableTableManager(_db, _db.categories);
   $$TodoEntriesTableTableManager get todoEntries =>
       $$TodoEntriesTableTableManager(_db, _db.todoEntries);
+  $TodoEntriesFtsTableManager get todoEntriesFts =>
+      $TodoEntriesFtsTableManager(_db, _db.todoEntriesFts);
+}
+
+class SearchTodosResult {
+  final TodoEntry t;
+  final Category? c;
+  SearchTodosResult({required this.t, this.c});
 }
 
 class GetCategoriesWithCountResult {

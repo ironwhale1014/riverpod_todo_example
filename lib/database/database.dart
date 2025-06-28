@@ -29,7 +29,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -40,6 +40,17 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(schema.todoEntries, schema.todoEntries.category);
           await m.alterTable(TableMigration(schema.todoEntries));
           logger.d('from1To2 end');
+        },
+        from2To3: (Migrator m, Schema3 schema) async {
+          logger.d('from2To3');
+          await m.createTable(schema.todoEntriesFts);
+          await m.create(schema.todoEntriesAd);
+          await m.create(schema.todoEntriesAi);
+          await m.create(schema.todoEntriesAu);
+          await customStatement(
+            'INSERT INTO todo_entries_fts(rowid, description) SELECT id, description FROM todo_entries;',
+          );
+          logger.d('from2To3 end');
         },
       ),
 

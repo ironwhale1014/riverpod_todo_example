@@ -1,5 +1,28 @@
 import 'tables.dart';
 
+CREATE VIRTUAL TABLE todo_entries_fts USING fts5(
+    description,
+    content=todo_entries,
+    content_rowid=id
+);
+
+-- Triggers to keep the FTS table up to date.
+CREATE TRIGGER todo_entries_ai AFTER INSERT ON todo_entries BEGIN
+  INSERT INTO todo_entries_fts(rowid, description) VALUES (new.id, new.description);
+END;
+CREATE TRIGGER todo_entries_ad AFTER DELETE ON todo_entries BEGIN
+  INSERT INTO todo_entries_fts(todo_entries_fts, rowid, description) VALUES('delete', old.id, old.description);
+END;
+CREATE TRIGGER todo_entries_au AFTER UPDATE ON todo_entries BEGIN
+  INSERT INTO todo_entries_fts(todo_entries_fts, rowid, description) VALUES('delete', old.id, old.description);
+  INSERT INTO todo_entries_fts(rowid, description) VALUES (new.id, new.description);
+END;
+
+searchTodos: SELECT t.**, c.**
+             FROM todo_entries_fts fts
+             INNER JOIN todo_entries t ON t.id = fts.rowid
+             LEFT JOIN categories c ON c.id = t.category
+             WHERE todo_entries_fts MATCH :query;
 
 
 getCategoriesWithCount: SELECT c.*, (SELECT COUNT(*) FROM todo_entries WHERE todo_entries.category = c.id) as amount

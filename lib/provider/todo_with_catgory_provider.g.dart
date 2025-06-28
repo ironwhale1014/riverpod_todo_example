@@ -26,7 +26,7 @@ final getTodoWithCategoryProvider =
 // ignore: unused_element
 typedef GetTodoWithCategoryRef =
     AutoDisposeStreamProviderRef<List<TodoWithCategory>>;
-String _$categoryStateHash() => r'5c5fd46c6794adf8172e31927d41fb60887fa4c1';
+String _$categoryStateHash() => r'5552a6f61703c5782bb59ec664d14dc8ef28ddec';
 
 /// See also [CategoryState].
 @ProviderFor(CategoryState)
