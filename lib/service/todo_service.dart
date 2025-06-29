@@ -12,20 +12,25 @@ class TodoService extends _$TodoService {
     return ref.watch(databaseProvider);
   }
 
-  void saveTodo({required String description, DateTime? dueDate}) async {
+  Future<void> saveTodo({
+    required String description,
+    DateTime? dueDate,
+    int? categoryId,
+  }) async {
     await state.todoEntries.insertOne(
       TodoEntriesCompanion.insert(
         description: description,
         dueDate: Value(dueDate),
+        category: Value(categoryId),
       ),
     );
   }
 
-  void updateTodo({required TodoEntry todo}) async {
+  Future<void> updateTodo({required TodoEntry todo}) async {
     await state.todoEntries.replaceOne(todo);
   }
 
-  void deleteTodo({required TodoEntry todo}) async {
+  Future<void> deleteTodo({required TodoEntry todo}) async {
     await state.todoEntries.deleteOne(todo);
   }
 
