@@ -15,7 +15,7 @@ AppDatabase database(Ref ref) {
   return AppDatabase();
 }
 
-@DriftDatabase(tables: [TodoEntries, Categories])
+@DriftDatabase(tables: [TodoEntries, Categories], include: {'sql.drift'})
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 

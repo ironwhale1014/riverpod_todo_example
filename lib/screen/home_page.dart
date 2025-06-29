@@ -1,5 +1,6 @@
 import 'package:drift_todo_train/common/layout/default_layout.dart';
 import 'package:drift_todo_train/domain/todo_with_category.dart';
+import 'package:drift_todo_train/screen/components/category_drawer.dart';
 import 'package:drift_todo_train/screen/components/todo_card.dart';
 import 'package:drift_todo_train/service/category_service.dart';
 import 'package:drift_todo_train/service/filter_provider.dart';
@@ -14,9 +15,11 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final category = ref.watch(categoryServiceProvider);
     final todoWithCategory = ref.watch(getTodoWithCategoryProvider);
     return DefaultLayout(
-      title: '홈',
+      title: category?.name ?? '기본 카테고리',
+      drawer: CategoryDrawer(),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
