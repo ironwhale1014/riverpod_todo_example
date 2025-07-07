@@ -2,8 +2,15 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:drift_todo_train/common/util/get_db_file.dart';
 import 'package:drift_todo_train/database/tables.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'database.g.dart';
+
+@Riverpod(keepAlive: true)
+AppDatabase database(Ref ref) {
+  return AppDatabase();
+}
 
 @DriftDatabase(tables: [Categories, TodoEntries])
 class AppDatabase extends _$AppDatabase {
