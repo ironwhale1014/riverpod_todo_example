@@ -2,6 +2,7 @@ import 'package:drift_todo_train/common/layout/default_layout.dart';
 import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:drift_todo_train/screen/components/custom_textfield.dart';
 import 'package:drift_todo_train/screen/components/todo_card.dart';
+import 'package:drift_todo_train/screen/components/toolbar.dart';
 import 'package:drift_todo_train/service/category_filter.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -42,6 +43,7 @@ class HomePage extends ConsumerWidget {
               onFieldSubmitted: (_) => addTodo(),
             ),
             SizedBox(height: 16),
+            Toolbar(),
             Expanded(
               child: ref
                   .watch(getTodoWithCategoryProvider)
