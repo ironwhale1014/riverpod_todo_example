@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_todo_train/database/database.dart';
+import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'todo_service.g.dart';
@@ -25,5 +26,26 @@ class TodoService extends _$TodoService {
             dueDate: Value(dueDate),
           ),
         );
+  }
+
+  Future<void> deleteTodo(TodoEntry todo) async {
+    await ref.read(databaseProvider).todoEntries.deleteOne(todo);
+  }
+
+  Stream<List<TodoWithCategory>> getTodoWithCategory(int? category) {
+    final database = ref.read(databaseProvider);
+    return (database.todoEntries.select().join([
+          leftOuterJoin(
+            database.categories,
+            database.categories.id.equalsExp(database.todoEntries.category),
+          ),
+        ]))
+        .map(
+          (row) => TodoWithCategory(
+            todoEntry: row.readTable(database.todoEntries),
+            category: row.readTableOrNull(database.categories),
+          ),
+        )
+        .watch();
   }
 }

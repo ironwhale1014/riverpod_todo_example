@@ -1,5 +1,8 @@
 import 'package:drift_todo_train/common/layout/default_layout.dart';
+import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:drift_todo_train/screen/components/custom_textfield.dart';
+import 'package:drift_todo_train/screen/components/todo_card.dart';
+import 'package:drift_todo_train/service/category_filter.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -38,9 +41,44 @@ class HomePage extends ConsumerWidget {
               },
               onFieldSubmitted: (_) => addTodo(),
             ),
+            SizedBox(
+              height: 16,
+            ),
+            Expanded(
+              child: ref
+                  .watch(getTodoWithCategoryProvider)
+                  .when(
+                    data: (List<TodoWithCategory> data) {
+                      return ListView.builder(
+                        itemCount: data.length,
+                        itemBuilder: (context, index) {
+                          final TodoWithCategory todoWithCategory = data[index];
+                          return ProviderScope(
+                            overrides: [
+                              currentTodoWithCategory.overrideWithValue(
+                                todoWithCategory,
+                              ),
+                            ],
+                            child: const TodoCard(),
+                          );
+                        },
+                      );
+                    },
+                    error: (Object error, StackTrace stackTrace) {
+                      return Text("error");
+                    },
+                    loading: () {
+                      return Center(child: CircularProgressIndicator());
+                    },
+                  ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+final currentTodoWithCategory = Provider<TodoWithCategory>(
+  (ref) => throw UnimplementedError(),
+);
