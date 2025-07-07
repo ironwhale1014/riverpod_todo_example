@@ -47,6 +47,11 @@ class CategoryService extends _$CategoryService {
     });
   }
 
+  Future<void> updateCategory(Category category) async {
+    final database = ref.read(databaseProvider);
+    await database.categories.replaceOne(category);
+  }
+
   Stream<List<CategoryWithCount>> getCategories() {
     return ref
         .read(databaseProvider)
