@@ -1,5 +1,7 @@
 import 'package:drift_todo_train/common/util/date_format.dart';
 import 'package:drift_todo_train/screen/components/custom_dialog.dart';
+import 'package:drift_todo_train/screen/components/custom_textfield.dart';
+import 'package:drift_todo_train/screen/components/todo_edit_dialog.dart';
 import 'package:drift_todo_train/screen/home_page.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +15,7 @@ class TodoCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final todoWithCategory = ref.watch(currentTodoWithCategory);
     final todoEntry = todoWithCategory.todoEntry;
-    final category = todoWithCategory.category;
+    final controller = TextEditingController();
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -52,7 +54,15 @@ class TodoCard extends ConsumerWidget {
               },
               icon: Icon(Icons.delete),
             ),
-            IconButton(onPressed: () {}, icon: Icon(Icons.edit)),
+            IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => TodoEditDialog(todoEntry: todoEntry),
+                );
+              },
+              icon: Icon(Icons.edit),
+            ),
           ],
         ),
       ),

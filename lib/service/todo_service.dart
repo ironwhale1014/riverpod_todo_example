@@ -32,6 +32,10 @@ class TodoService extends _$TodoService {
     await ref.read(databaseProvider).todoEntries.deleteOne(todo);
   }
 
+  Future<void> updateTodo(TodoEntry todo) async {
+    await ref.read(databaseProvider).todoEntries.replaceOne(todo);
+  }
+
   Stream<List<TodoWithCategory>> getTodoWithCategory(int? category) {
     final database = ref.read(databaseProvider);
     return (database.todoEntries.select().join([

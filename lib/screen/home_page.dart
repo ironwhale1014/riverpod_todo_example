@@ -41,9 +41,7 @@ class HomePage extends ConsumerWidget {
               },
               onFieldSubmitted: (_) => addTodo(),
             ),
-            SizedBox(
-              height: 16,
-            ),
+            SizedBox(height: 16),
             Expanded(
               child: ref
                   .watch(getTodoWithCategoryProvider)

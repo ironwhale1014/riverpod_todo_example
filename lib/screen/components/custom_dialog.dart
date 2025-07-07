@@ -30,11 +30,21 @@ class CustomDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AlertDialog(
-      title: title != null ? Text(title!) : null,
+      title: title != null ? Text(title!, textAlign: TextAlign.center) : null,
       content: content,
+      actionsAlignment: MainAxisAlignment.center,
+      actionsPadding: EdgeInsets.only(bottom: 8),
       actions: [
-        TextButton(onPressed: leftBtnOnPressed, child: Text('Cancel')),
-        TextButton(onPressed: rightBtnOnPressed, child: Text('Ok')),
+        MaterialButton(
+          padding: EdgeInsets.zero,
+          onPressed: leftBtnOnPressed,
+          child: Text('Cancel'),
+        ),
+        MaterialButton(
+          padding: EdgeInsets.zero,
+          onPressed: rightBtnOnPressed,
+          child: Text('Ok'),
+        ),
       ],
     );
   }
