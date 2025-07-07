@@ -12,6 +12,10 @@ class TodoEntries extends Table with PrimaryKey {
   TextColumn get description => text()();
 
   DateTimeColumn get dueDate => dateTime().nullable()();
+
+  IntColumn get category => integer().nullable().references(Categories, #id)();
+
+  BoolColumn get isComplete => boolean().withDefault(const Constant(false))();
 }
 
 @DataClassName('Category')

@@ -237,17 +237,6 @@ class TodoEntries extends Table with TableInfo<TodoEntries, TodoEntriesData> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
-    'is_completed',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_completed" IN (0, 1))',
-    ),
-    defaultValue: const CustomExpression('0'),
-  );
   late final GeneratedColumn<DateTime> dueDate = GeneratedColumn<DateTime>(
     'due_date',
     aliasedName,
@@ -265,13 +254,24 @@ class TodoEntries extends Table with TableInfo<TodoEntries, TodoEntriesData> {
       'REFERENCES categories (id)',
     ),
   );
+  late final GeneratedColumn<bool> isComplete = GeneratedColumn<bool>(
+    'is_complete',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_complete" IN (0, 1))',
+    ),
+    defaultValue: const CustomExpression('0'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     description,
-    isCompleted,
     dueDate,
     category,
+    isComplete,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -292,10 +292,6 @@ class TodoEntries extends Table with TableInfo<TodoEntries, TodoEntriesData> {
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       )!,
-      isCompleted: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_completed'],
-      )!,
       dueDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}due_date'],
@@ -304,6 +300,10 @@ class TodoEntries extends Table with TableInfo<TodoEntries, TodoEntriesData> {
         DriftSqlType.int,
         data['${effectivePrefix}category'],
       ),
+      isComplete: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_complete'],
+      )!,
     );
   }
 
@@ -316,28 +316,28 @@ class TodoEntries extends Table with TableInfo<TodoEntries, TodoEntriesData> {
 class TodoEntriesData extends DataClass implements Insertable<TodoEntriesData> {
   final int id;
   final String description;
-  final bool isCompleted;
   final DateTime? dueDate;
   final int? category;
+  final bool isComplete;
   const TodoEntriesData({
     required this.id,
     required this.description,
-    required this.isCompleted,
     this.dueDate,
     this.category,
+    required this.isComplete,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['description'] = Variable<String>(description);
-    map['is_completed'] = Variable<bool>(isCompleted);
     if (!nullToAbsent || dueDate != null) {
       map['due_date'] = Variable<DateTime>(dueDate);
     }
     if (!nullToAbsent || category != null) {
       map['category'] = Variable<int>(category);
     }
+    map['is_complete'] = Variable<bool>(isComplete);
     return map;
   }
 
@@ -345,13 +345,13 @@ class TodoEntriesData extends DataClass implements Insertable<TodoEntriesData> {
     return TodoEntriesCompanion(
       id: Value(id),
       description: Value(description),
-      isCompleted: Value(isCompleted),
       dueDate: dueDate == null && nullToAbsent
           ? const Value.absent()
           : Value(dueDate),
       category: category == null && nullToAbsent
           ? const Value.absent()
           : Value(category),
+      isComplete: Value(isComplete),
     );
   }
 
@@ -363,9 +363,9 @@ class TodoEntriesData extends DataClass implements Insertable<TodoEntriesData> {
     return TodoEntriesData(
       id: serializer.fromJson<int>(json['id']),
       description: serializer.fromJson<String>(json['description']),
-      isCompleted: serializer.fromJson<bool>(json['isCompleted']),
       dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
       category: serializer.fromJson<int?>(json['category']),
+      isComplete: serializer.fromJson<bool>(json['isComplete']),
     );
   }
   @override
@@ -374,24 +374,24 @@ class TodoEntriesData extends DataClass implements Insertable<TodoEntriesData> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'description': serializer.toJson<String>(description),
-      'isCompleted': serializer.toJson<bool>(isCompleted),
       'dueDate': serializer.toJson<DateTime?>(dueDate),
       'category': serializer.toJson<int?>(category),
+      'isComplete': serializer.toJson<bool>(isComplete),
     };
   }
 
   TodoEntriesData copyWith({
     int? id,
     String? description,
-    bool? isCompleted,
     Value<DateTime?> dueDate = const Value.absent(),
     Value<int?> category = const Value.absent(),
+    bool? isComplete,
   }) => TodoEntriesData(
     id: id ?? this.id,
     description: description ?? this.description,
-    isCompleted: isCompleted ?? this.isCompleted,
     dueDate: dueDate.present ? dueDate.value : this.dueDate,
     category: category.present ? category.value : this.category,
+    isComplete: isComplete ?? this.isComplete,
   );
   TodoEntriesData copyWithCompanion(TodoEntriesCompanion data) {
     return TodoEntriesData(
@@ -399,11 +399,11 @@ class TodoEntriesData extends DataClass implements Insertable<TodoEntriesData> {
       description: data.description.present
           ? data.description.value
           : this.description,
-      isCompleted: data.isCompleted.present
-          ? data.isCompleted.value
-          : this.isCompleted,
       dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
       category: data.category.present ? data.category.value : this.category,
+      isComplete: data.isComplete.present
+          ? data.isComplete.value
+          : this.isComplete,
     );
   }
 
@@ -412,76 +412,76 @@ class TodoEntriesData extends DataClass implements Insertable<TodoEntriesData> {
     return (StringBuffer('TodoEntriesData(')
           ..write('id: $id, ')
           ..write('description: $description, ')
-          ..write('isCompleted: $isCompleted, ')
           ..write('dueDate: $dueDate, ')
-          ..write('category: $category')
+          ..write('category: $category, ')
+          ..write('isComplete: $isComplete')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, description, isCompleted, dueDate, category);
+      Object.hash(id, description, dueDate, category, isComplete);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TodoEntriesData &&
           other.id == this.id &&
           other.description == this.description &&
-          other.isCompleted == this.isCompleted &&
           other.dueDate == this.dueDate &&
-          other.category == this.category);
+          other.category == this.category &&
+          other.isComplete == this.isComplete);
 }
 
 class TodoEntriesCompanion extends UpdateCompanion<TodoEntriesData> {
   final Value<int> id;
   final Value<String> description;
-  final Value<bool> isCompleted;
   final Value<DateTime?> dueDate;
   final Value<int?> category;
+  final Value<bool> isComplete;
   const TodoEntriesCompanion({
     this.id = const Value.absent(),
     this.description = const Value.absent(),
-    this.isCompleted = const Value.absent(),
     this.dueDate = const Value.absent(),
     this.category = const Value.absent(),
+    this.isComplete = const Value.absent(),
   });
   TodoEntriesCompanion.insert({
     this.id = const Value.absent(),
     required String description,
-    this.isCompleted = const Value.absent(),
     this.dueDate = const Value.absent(),
     this.category = const Value.absent(),
+    this.isComplete = const Value.absent(),
   }) : description = Value(description);
   static Insertable<TodoEntriesData> custom({
     Expression<int>? id,
     Expression<String>? description,
-    Expression<bool>? isCompleted,
     Expression<DateTime>? dueDate,
     Expression<int>? category,
+    Expression<bool>? isComplete,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (description != null) 'description': description,
-      if (isCompleted != null) 'is_completed': isCompleted,
       if (dueDate != null) 'due_date': dueDate,
       if (category != null) 'category': category,
+      if (isComplete != null) 'is_complete': isComplete,
     });
   }
 
   TodoEntriesCompanion copyWith({
     Value<int>? id,
     Value<String>? description,
-    Value<bool>? isCompleted,
     Value<DateTime?>? dueDate,
     Value<int?>? category,
+    Value<bool>? isComplete,
   }) {
     return TodoEntriesCompanion(
       id: id ?? this.id,
       description: description ?? this.description,
-      isCompleted: isCompleted ?? this.isCompleted,
       dueDate: dueDate ?? this.dueDate,
       category: category ?? this.category,
+      isComplete: isComplete ?? this.isComplete,
     );
   }
 
@@ -494,14 +494,14 @@ class TodoEntriesCompanion extends UpdateCompanion<TodoEntriesData> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
-    if (isCompleted.present) {
-      map['is_completed'] = Variable<bool>(isCompleted.value);
-    }
     if (dueDate.present) {
       map['due_date'] = Variable<DateTime>(dueDate.value);
     }
     if (category.present) {
       map['category'] = Variable<int>(category.value);
+    }
+    if (isComplete.present) {
+      map['is_complete'] = Variable<bool>(isComplete.value);
     }
     return map;
   }
@@ -511,9 +511,9 @@ class TodoEntriesCompanion extends UpdateCompanion<TodoEntriesData> {
     return (StringBuffer('TodoEntriesCompanion(')
           ..write('id: $id, ')
           ..write('description: $description, ')
-          ..write('isCompleted: $isCompleted, ')
           ..write('dueDate: $dueDate, ')
-          ..write('category: $category')
+          ..write('category: $category, ')
+          ..write('isComplete: $isComplete')
           ..write(')'))
         .toString();
   }
