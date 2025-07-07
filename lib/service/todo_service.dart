@@ -25,6 +25,7 @@ class TodoService extends _$TodoService {
           TodoEntriesCompanion.insert(
             description: description,
             dueDate: Value(dueDate),
+            category: Value(categoryId),
           ),
         );
   }

@@ -35,16 +35,18 @@ class CustomDialog extends ConsumerWidget {
       actionsAlignment: MainAxisAlignment.center,
       actionsPadding: EdgeInsets.only(bottom: 8),
       actions: [
-        MaterialButton(
-          padding: EdgeInsets.zero,
-          onPressed: leftBtnOnPressed,
-          child: Text('Cancel'),
-        ),
-        MaterialButton(
-          padding: EdgeInsets.zero,
-          onPressed: rightBtnOnPressed,
-          child: Text('Ok'),
-        ),
+        if (leftBtnOnPressed != null)
+          MaterialButton(
+            padding: EdgeInsets.zero,
+            onPressed: leftBtnOnPressed,
+            child: Text('Cancel'),
+          ),
+        if (rightBtnOnPressed != null)
+          MaterialButton(
+            padding: EdgeInsets.zero,
+            onPressed: rightBtnOnPressed,
+            child: Text('Ok'),
+          ),
       ],
     );
   }

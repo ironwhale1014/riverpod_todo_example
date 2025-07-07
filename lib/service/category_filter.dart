@@ -1,4 +1,5 @@
 import 'package:drift_todo_train/domain/todo_with_category.dart';
+import 'package:drift_todo_train/service/category_service.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -25,7 +26,7 @@ class TodoListFilterNotifier extends _$TodoListFilterNotifier {
 @riverpod
 Stream<List<TodoWithCategory>> getTodoWithCategory(Ref ref) {
   final TodoListFilter filter = ref.watch(todoListFilterNotifierProvider);
-  final category = null;
+  final category = ref.watch(categoryStateProvider)?.id;
 
   switch (filter) {
     case TodoListFilter.all:

@@ -7,7 +7,7 @@ part of 'category_filter.dart';
 // **************************************************************************
 
 String _$getTodoWithCategoryHash() =>
-    r'dc64f1ed3a3bf7923bd5dbed5accbfb2689a18b2';
+    r'f318cb97bec15214a069f550b2d2f0b4e5e75604';
 
 /// See also [getTodoWithCategory].
 @ProviderFor(getTodoWithCategory)

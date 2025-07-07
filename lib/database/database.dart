@@ -14,7 +14,7 @@ AppDatabase database(Ref ref) {
   return AppDatabase();
 }
 
-@DriftDatabase(tables: [Categories, TodoEntries])
+@DriftDatabase(tables: [Categories, TodoEntries],include: {'sql.drift'})
 class AppDatabase extends _$AppDatabase {
   AppDatabase()
     : super(

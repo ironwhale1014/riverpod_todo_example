@@ -1,11 +1,13 @@
 import 'package:drift_todo_train/common/layout/default_layout.dart';
+import 'package:drift_todo_train/common/util/logger.dart';
 import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:drift_todo_train/screen/components/custom_textfield.dart';
+import 'package:drift_todo_train/screen/components/my_drawer.dart';
 import 'package:drift_todo_train/screen/components/todo_card.dart';
 import 'package:drift_todo_train/screen/components/toolbar.dart';
 import 'package:drift_todo_train/service/category_filter.dart';
+import 'package:drift_todo_train/service/category_service.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -17,15 +19,20 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    logger.d( ref.read(categoryStateProvider)?.id);
     addTodo() async {
       await ref
           .read(todoServiceProvider.notifier)
-          .saveTodo(description: _controller.text.trim());
+          .saveTodo(
+            description: _controller.text.trim(),
+            categoryId: ref.read(categoryStateProvider)?.id,
+          );
       _controller.clear();
     }
 
     return DefaultLayout(
-      title: 'Home',
+      drawer: MyDrawer(),
+      title: ref.watch(categoryStateProvider)?.name ?? '기본',
       child: Form(
         key: _formKey,
         child: Column(
