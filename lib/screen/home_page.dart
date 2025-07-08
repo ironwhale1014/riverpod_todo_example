@@ -9,6 +9,7 @@ import 'package:drift_todo_train/service/category_filter.dart';
 import 'package:drift_todo_train/service/category_service.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class HomePage extends ConsumerWidget {
@@ -19,7 +20,6 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    logger.d( ref.read(categoryStateProvider)?.id);
     addTodo() async {
       await ref
           .read(todoServiceProvider.notifier)
@@ -33,6 +33,14 @@ class HomePage extends ConsumerWidget {
     return DefaultLayout(
       drawer: MyDrawer(),
       title: ref.watch(categoryStateProvider)?.name ?? '기본',
+      actions: [
+        IconButton(
+          onPressed: () {
+            context.pushNamed('search');
+          },
+          icon: Icon(Icons.search),
+        ),
+      ],
       child: Form(
         key: _formKey,
         child: Column(
@@ -60,14 +68,7 @@ class HomePage extends ConsumerWidget {
                         itemCount: data.length,
                         itemBuilder: (context, index) {
                           final TodoWithCategory todoWithCategory = data[index];
-                          return ProviderScope(
-                            overrides: [
-                              currentTodoWithCategory.overrideWithValue(
-                                todoWithCategory,
-                              ),
-                            ],
-                            child: const TodoCard(),
-                          );
+                          return TodoCard(todoWithCategory: todoWithCategory);
                         },
                       );
                     },

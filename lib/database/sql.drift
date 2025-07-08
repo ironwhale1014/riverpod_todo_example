@@ -30,3 +30,8 @@ BEGIN
   INSERT INTO todo_entries_fts (todo_entries_fts,rowid, description)
   VALUES ('delete',old.id, old.description);
 END;
+
+search: SELECT cat.**, todo.** FROM  todo_entries_fts
+        INNER JOIN todo_entries todo ON todo.id = todo_entries_fts.rowid
+        LEFT OUTER JOIN categories cat ON cat.id = todo.category
+        WHERE todo_entries_fts MATCH :query ORDER BY rank;

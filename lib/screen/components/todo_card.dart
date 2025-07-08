@@ -1,18 +1,19 @@
 import 'package:drift_todo_train/common/util/date_format.dart';
+import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:drift_todo_train/screen/components/custom_dialog.dart';
 import 'package:drift_todo_train/screen/components/todo_edit_dialog.dart';
-import 'package:drift_todo_train/screen/home_page.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class TodoCard extends ConsumerWidget {
-  const TodoCard({super.key});
+  const TodoCard({super.key, required this.todoWithCategory});
+
+  final TodoWithCategory todoWithCategory;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final todoWithCategory = ref.watch(currentTodoWithCategory);
     final todoEntry = todoWithCategory.todoEntry;
     return InkWell(
       onTap: () {

@@ -45,6 +45,16 @@ class TodoService extends _$TodoService {
     await ref.read(databaseProvider).todoEntries.replaceOne(todo);
   }
 
+  Future<List<TodoWithCategory>> search(String searchText) {
+    final database = ref.read(databaseProvider);
+    return (database
+            .search('$searchText*')
+            .map(
+              (row) => TodoWithCategory(todoEntry: row.todo, category: row.cat),
+            ))
+        .get();
+  }
+
   Stream<List<TodoWithCategory>> getTodoWithCategory(
     int? category, {
     TodoListFilter filter = TodoListFilter.all,

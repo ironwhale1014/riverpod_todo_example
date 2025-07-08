@@ -6,7 +6,7 @@ part of 'category_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$categoryStateHash() => r'000827ace165cc5692816e1b89f617bdfef68bf7';
+String _$categoryStateHash() => r'05b2b9cf4c3c508ffd827eec7b008fe8b79dc446';
 
 /// See also [CategoryState].
 @ProviderFor(CategoryState)
@@ -22,7 +22,7 @@ final categoryStateProvider =
     );
 
 typedef _$CategoryState = AutoDisposeNotifier<Category?>;
-String _$categoryServiceHash() => r'7993fc6ad910416fa1a621fefcb14afb477f5ed4';
+String _$categoryServiceHash() => r'e73ab3d47461a72b6a12427611c800a9312652ad';
 
 /// See also [CategoryService].
 @ProviderFor(CategoryService)

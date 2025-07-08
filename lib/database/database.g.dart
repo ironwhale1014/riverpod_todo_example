@@ -831,6 +831,19 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     );
   }
 
+  Selectable<SearchResult> search(String query) {
+    return customSelect(
+      'SELECT"cat"."id" AS "nested_0.id", "cat"."name" AS "nested_0.name", "cat"."color" AS "nested_0.color","todo"."id" AS "nested_1.id", "todo"."description" AS "nested_1.description", "todo"."due_date" AS "nested_1.due_date", "todo"."category" AS "nested_1.category", "todo"."is_complete" AS "nested_1.is_complete" FROM todo_entries_fts INNER JOIN todo_entries AS todo ON todo.id = todo_entries_fts."rowid" LEFT OUTER JOIN categories AS cat ON cat.id = todo.category WHERE todo_entries_fts MATCH ?1 ORDER BY rank',
+      variables: [Variable<String>(query)],
+      readsFrom: {todoEntriesFts, todoEntries, categories},
+    ).asyncMap(
+      (QueryRow row) async => SearchResult(
+        cat: await categories.mapFromRowOrNull(row, tablePrefix: 'nested_0'),
+        todo: await todoEntries.mapFromRow(row, tablePrefix: 'nested_1'),
+      ),
+    );
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1586,6 +1599,12 @@ class GetCategoryWithCountResult {
     this.color,
     required this.amount,
   });
+}
+
+class SearchResult {
+  final Category? cat;
+  final TodoEntry todo;
+  SearchResult({this.cat, required this.todo});
 }
 
 // **************************************************************************
