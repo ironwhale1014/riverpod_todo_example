@@ -5,3 +5,28 @@ getCategoryWithCount: SELECT c.*, (SELECT COUNT(*) FROM todo_entries te WHERE te
                       FROM categories c
                       UNION ALL
                       SELECT NULL, NULL, NULL, (SELECT COUNT(*) FROM todo_entries te WHERE te.category IS NULL);
+
+
+CREATE VIRTUAL TABLE todo_entries_fts USING fts5(description, content=todo_entries, content_rowid=id);
+
+
+CREATE TRIGGER todo_entries_insert AFTER INSERT ON todo_entries
+BEGIN
+  INSERT INTO todo_entries_fts (rowid, description)
+  VALUES (new.id, new.description);
+END;
+
+CREATE TRIGGER todo_entries_update AFTER UPDATE ON todo_entries
+BEGIN
+  INSERT INTO todo_entries_fts (todo_entries_fts,rowid, description)
+  VALUES ('delete',old.id, old.description);
+
+  INSERT INTO todo_entries_fts (rowid, description)
+  VALUES (new.id, new.description);
+END;
+
+CREATE TRIGGER todo_entries_delete AFTER DELETE ON todo_entries
+BEGIN
+  INSERT INTO todo_entries_fts (todo_entries_fts,rowid, description)
+  VALUES ('delete',old.id, old.description);
+END;
