@@ -1,6 +1,7 @@
 import 'package:drift_todo_train/common/layout/default_layout.dart';
 import 'package:drift_todo_train/common/util/logger.dart';
 import 'package:drift_todo_train/domain/todo_with_category.dart';
+import 'package:drift_todo_train/screen/backup/backup.dart';
 import 'package:drift_todo_train/screen/components/custom_textfield.dart';
 import 'package:drift_todo_train/screen/components/my_drawer.dart';
 import 'package:drift_todo_train/screen/components/todo_card.dart';
@@ -40,6 +41,7 @@ class HomePage extends ConsumerWidget {
           },
           icon: Icon(Icons.search),
         ),
+        BackupButton(),
       ],
       child: Form(
         key: _formKey,
