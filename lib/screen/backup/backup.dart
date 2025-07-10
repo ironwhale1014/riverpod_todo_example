@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:drift_todo_train/common/util/get_db_file.dart';
 import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/screen/components/custom_dialog.dart';
-import 'package:drift_todo_train/service/category_filter.dart';
+import 'package:drift_todo_train/service/todo_list_filter_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -60,10 +60,12 @@ class _BackupDialog extends ConsumerWidget {
         tempFile.deleteSync();
 
         ref.invalidate(databaseProvider);
-        ref.invalidate(getTodoWithCategoryProvider);
+        // ref.invalidate(getTodoWithCategoryProvider);
 
-        if(context.mounted){
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('복원 완료')));
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('복원 완료')));
           context.pop();
         }
       },
@@ -75,8 +77,10 @@ class _BackupDialog extends ConsumerWidget {
         ref.read(databaseProvider).customStatement('VACUUM INTO ?', [
           backupFile.path,
         ]);
-        if(context.mounted){
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('백업 완료')));
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('백업 완료')));
           context.pop();
         }
       },

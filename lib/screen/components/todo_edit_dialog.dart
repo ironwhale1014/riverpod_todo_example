@@ -3,7 +3,7 @@ import 'package:drift_todo_train/common/util/date_format.dart';
 import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/screen/components/custom_dialog.dart';
 import 'package:drift_todo_train/screen/components/custom_textfield.dart';
-import 'package:drift_todo_train/service/todo_service.dart';
+import 'package:drift_todo_train/service/todo_with_category_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -25,6 +25,7 @@ class _TodoEditDialogState extends ConsumerState<TodoEditDialog> {
   void initState() {
     super.initState();
     controller.text = widget.todoEntry.description;
+    dueDate = widget.todoEntry.dueDate;
   }
 
   @override
@@ -80,9 +81,10 @@ class _TodoEditDialogState extends ConsumerState<TodoEditDialog> {
       },
       rightBtnOnPressed: () async {
         context.pop();
-        ref
-            .read(todoServiceProvider.notifier)
-            .updateTodo(
+
+        await ref
+            .read(todoWithCategoryStateProvider.notifier)
+            .update(
               widget.todoEntry.copyWith(
                 description: controller.text.trim().isNotEmpty
                     ? controller.text.trim()

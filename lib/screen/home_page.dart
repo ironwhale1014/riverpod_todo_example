@@ -1,14 +1,16 @@
 import 'package:drift_todo_train/common/layout/default_layout.dart';
 import 'package:drift_todo_train/common/util/logger.dart';
+import 'package:drift_todo_train/domain/base_model.dart';
 import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:drift_todo_train/screen/backup/backup.dart';
 import 'package:drift_todo_train/screen/components/custom_textfield.dart';
 import 'package:drift_todo_train/screen/components/my_drawer.dart';
 import 'package:drift_todo_train/screen/components/todo_card.dart';
 import 'package:drift_todo_train/screen/components/toolbar.dart';
-import 'package:drift_todo_train/service/category_filter.dart';
+import 'package:drift_todo_train/service/todo_list_filter_state_provider.dart';
 import 'package:drift_todo_train/service/category_service.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
+import 'package:drift_todo_train/service/todo_with_category_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -23,14 +25,16 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     addTodo() async {
       await ref
-          .read(todoServiceProvider.notifier)
-          .saveTodo(
+          .read(todoWithCategoryStateProvider.notifier)
+          .save(
             description: _controller.text.trim(),
             categoryId: ref.read(categoryStateProvider)?.id,
           );
+
       _controller.clear();
     }
 
+    final state = ref.watch(todoWithCategoryStateProvider);
     return DefaultLayout(
       drawer: MyDrawer(),
       title: ref.watch(categoryStateProvider)?.name ?? '기본',
@@ -62,25 +66,14 @@ class HomePage extends ConsumerWidget {
             SizedBox(height: 16),
             Toolbar(),
             Expanded(
-              child: ref
-                  .watch(getTodoWithCategoryProvider)
-                  .when(
-                    data: (List<TodoWithCategory> data) {
-                      return ListView.builder(
-                        itemCount: data.length,
-                        itemBuilder: (context, index) {
-                          final TodoWithCategory todoWithCategory = data[index];
-                          return TodoCard(todoWithCategory: todoWithCategory);
-                        },
-                      );
-                    },
-                    error: (Object error, StackTrace stackTrace) {
-                      return Text("error");
-                    },
-                    loading: () {
-                      return Center(child: CircularProgressIndicator());
-                    },
-                  ),
+              child: switch (state) {
+                Loading() => const Center(child: CircularProgressIndicator()),
+                Model<TodoWithCategory>() => ListView.builder(
+                  itemCount: state.data.length,
+                  itemBuilder: (context, index) =>
+                      TodoCard(todoWithCategory: state.data[index]),
+                ), // 혹시 모를 예외 처리
+              },
             ),
           ],
         ),

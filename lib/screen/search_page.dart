@@ -1,14 +1,15 @@
 import 'package:drift_todo_train/common/layout/default_layout.dart';
-import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:drift_todo_train/screen/components/custom_textfield.dart';
 import 'package:drift_todo_train/screen/components/todo_card.dart';
+import 'package:drift_todo_train/service/todo_list_filter_state_provider.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:drift_todo_train/service/todo_with_category_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../common/util/logger.dart';
+import '../domain/base_model.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -20,15 +21,15 @@ class SearchPage extends ConsumerStatefulWidget {
 class _SearchPageState extends ConsumerState<SearchPage> {
   final controller = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  Future<List<TodoWithCategory>>? searchResults;
 
   void listener() async {
-    logger.d(controller.text);
     if (formKey.currentState!.validate()) {
+      ref
+          .read(todoWithCategoryStateProvider.notifier)
+          .search(controller.text.trim());
+    } else {
       setState(() {
-        searchResults = ref
-            .read(todoServiceProvider.notifier)
-            .search(controller.text.trim());
+        ref.read(todoWithCategoryStateProvider.notifier).paginate();
       });
     }
   }
@@ -49,6 +50,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(todoWithCategoryStateProvider);
     return DefaultLayout(
       title: 'search',
       child: Form(
@@ -65,29 +67,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               },
             ),
             Expanded(
-              child: FutureBuilder(
-                future: searchResults,
-                builder:
-                    (
-                      BuildContext context,
-                      AsyncSnapshot<List<TodoWithCategory>> snapshot,
-                    ) {
-                      if (snapshot.hasData) {
-                        final List<TodoWithCategory> todoWithCategories =
-                            snapshot.data!;
-
-                        return ListView.builder(
-                          itemCount: todoWithCategories.length,
-                          itemBuilder: (context, index) {
-                            return TodoCard(
-                              todoWithCategory: todoWithCategories[index],
-                            );
-                          },
-                        );
-                      }
-                      return Center(child: Text('검색어를 입력해주세요'));
-                    },
-              ),
+              child: switch (state) {
+                Loading() => const Center(child: CircularProgressIndicator()),
+                Model<TodoWithCategory>() => ListView.builder(
+                  itemCount: state.data.length,
+                  itemBuilder: (context, index) =>
+                      TodoCard(todoWithCategory: state.data[index]),
+                ), // 혹시 모를 예외 처리
+              },
             ),
           ],
         ),

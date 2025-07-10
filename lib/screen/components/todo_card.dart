@@ -1,8 +1,10 @@
 import 'package:drift_todo_train/common/util/date_format.dart';
+import 'package:drift_todo_train/common/util/logger.dart';
 import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:drift_todo_train/screen/components/custom_dialog.dart';
 import 'package:drift_todo_train/screen/components/todo_edit_dialog.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
+import 'package:drift_todo_train/service/todo_with_category_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -17,7 +19,8 @@ class TodoCard extends ConsumerWidget {
     final todoEntry = todoWithCategory.todoEntry;
     return InkWell(
       onTap: () {
-        ref.read(todoServiceProvider.notifier).toggleTodo(todoEntry);
+        logger.d('toggle');
+        ref.read(todoWithCategoryStateProvider.notifier).toggle(todoEntry);
       },
       child: Card(
         color: todoEntry.isComplete ? Colors.greenAccent : Colors.white,
@@ -50,8 +53,8 @@ class TodoCard extends ConsumerWidget {
                       rightBtnOnPressed: () async {
                         context.pop();
                         await ref
-                            .read(todoServiceProvider.notifier)
-                            .deleteTodo(todoEntry);
+                            .read(todoWithCategoryStateProvider.notifier)
+                            .delete(todoEntry);
                       },
                     ),
                   );

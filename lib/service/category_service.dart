@@ -27,6 +27,12 @@ class CategoryService extends _$CategoryService {
     return null;
   }
 
+  Future<Category> findById(int id) async {
+    final database = ref.read(databaseProvider);
+    return await (database.categories.select()..where((t) => t.id.equals(id)))
+        .getSingle();
+  }
+
   Future<void> saveCategory({required String name}) async {
     final random = Random(42);
     final color = Colors.primaries[random.nextInt(Colors.primaries.length)];

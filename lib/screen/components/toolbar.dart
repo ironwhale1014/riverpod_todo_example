@@ -1,4 +1,4 @@
-import 'package:drift_todo_train/service/category_filter.dart';
+import 'package:drift_todo_train/service/todo_list_filter_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -14,7 +14,7 @@ class Toolbar extends ConsumerWidget {
           TextButton(
             onPressed: () {
               ref
-                  .read(todoListFilterNotifierProvider.notifier)
+                  .read(todoListFilterStateProvider.notifier)
                   .setFilter(TodoListFilter.all);
             },
             child: Text('ALL'),
@@ -22,7 +22,7 @@ class Toolbar extends ConsumerWidget {
           TextButton(
             onPressed: () {
               ref
-                  .read(todoListFilterNotifierProvider.notifier)
+                  .read(todoListFilterStateProvider.notifier)
                   .setFilter(TodoListFilter.active);
             },
             child: Text('Uncompleted'),
@@ -30,7 +30,7 @@ class Toolbar extends ConsumerWidget {
           TextButton(
             onPressed: () {
               ref
-                  .read(todoListFilterNotifierProvider.notifier)
+                  .read(todoListFilterStateProvider.notifier)
                   .setFilter(TodoListFilter.completed);
             },
             child: Text('Completed'),
