@@ -4,6 +4,7 @@ import 'package:drift_todo_train/common/util/get_db_file.dart';
 import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/screen/components/custom_dialog.dart';
 import 'package:drift_todo_train/service/todo_list_filter_state_provider.dart';
+import 'package:drift_todo_train/service/todo_with_category_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -60,7 +61,7 @@ class _BackupDialog extends ConsumerWidget {
         tempFile.deleteSync();
 
         ref.invalidate(databaseProvider);
-        // ref.invalidate(getTodoWithCategoryProvider);
+        ref.invalidate(todoWithCategoryStateProvider);
 
         if (context.mounted) {
           ScaffoldMessenger.of(
