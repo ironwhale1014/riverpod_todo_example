@@ -6,26 +6,6 @@ part of 'category_filter.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$getTodoWithCategoryHash() =>
-    r'f318cb97bec15214a069f550b2d2f0b4e5e75604';
-
-/// See also [getTodoWithCategory].
-@ProviderFor(getTodoWithCategory)
-final getTodoWithCategoryProvider =
-    AutoDisposeStreamProvider<List<TodoWithCategory>>.internal(
-      getTodoWithCategory,
-      name: r'getTodoWithCategoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$getTodoWithCategoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef GetTodoWithCategoryRef =
-    AutoDisposeStreamProviderRef<List<TodoWithCategory>>;
 String _$todoListFilterNotifierHash() =>
     r'e5f4d12bef6df5b203393ea00948aaa273ece35a';
 

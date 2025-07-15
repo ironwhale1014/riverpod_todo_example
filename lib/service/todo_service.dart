@@ -13,12 +13,12 @@ class TodoService extends _$TodoService {
     return null;
   }
 
-  Future<void> saveTodo({
+  Future<TodoEntry> saveTodo({
     required String description,
     int? categoryId,
     DateTime? dueDate,
   }) async {
-    await ref
+    final id = await ref
         .read(databaseProvider)
         .todoEntries
         .insertOne(
@@ -28,6 +28,10 @@ class TodoService extends _$TodoService {
             category: Value(categoryId),
           ),
         );
+
+    return await (ref.read(databaseProvider).todoEntries.select()
+          ..where((e) => e.id.equals(id)))
+        .getSingle();
   }
 
   Future<void> deleteTodo(TodoEntry todo) async {
@@ -55,7 +59,7 @@ class TodoService extends _$TodoService {
         .get();
   }
 
-  Stream<List<TodoWithCategory>> getTodoWithCategory(
+  Future<List<TodoWithCategory>> getTodoWithCategory(
     int? category, {
     TodoListFilter filter = TodoListFilter.all,
   }) {
@@ -83,7 +87,7 @@ class TodoService extends _$TodoService {
                 category: row.readTableOrNull(database.categories),
               ),
             )
-            .watch();
+            .get();
       case TodoListFilter.active:
         return (query..where(database.todoEntries.isComplete.equals(false)))
             .map(
@@ -92,7 +96,7 @@ class TodoService extends _$TodoService {
                 category: row.readTableOrNull(database.categories),
               ),
             )
-            .watch();
+            .get();
       case TodoListFilter.completed:
         return (query..where(database.todoEntries.isComplete.equals(true)))
             .map(
@@ -101,7 +105,7 @@ class TodoService extends _$TodoService {
                 category: row.readTableOrNull(database.categories),
               ),
             )
-            .watch();
+            .get();
     }
   }
 }
