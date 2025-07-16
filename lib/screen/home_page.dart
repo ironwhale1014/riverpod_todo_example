@@ -22,7 +22,6 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(todoWithCategoryStateProvider);
     addTodo() async {
       await ref
           .read(todoWithCategoryStateProvider.notifier)

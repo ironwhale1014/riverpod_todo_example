@@ -1,5 +1,4 @@
 import 'package:drift_todo_train/domain/base_model.dart';
-import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
