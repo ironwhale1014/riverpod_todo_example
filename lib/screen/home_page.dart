@@ -1,4 +1,5 @@
 import 'package:drift_todo_train/common/layout/default_layout.dart';
+import 'package:drift_todo_train/common/util/logger.dart';
 import 'package:drift_todo_train/domain/base_model.dart';
 import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:drift_todo_train/screen/backup/backup.dart';
@@ -63,34 +64,12 @@ class HomePage extends ConsumerWidget {
             SizedBox(height: 16),
             Toolbar(),
             Expanded(
-              child: CommonListview<BaseModel, Model<TodoWithCategory>>(
+              child: CommonListview<BaseModel, TodoWithCategory>(
                 provider: todoWithCategoryStateProvider,
-                itemBuilder: (context, index, model) {
-                  return TodoCard(todoWithCategory: model.data[index]);
-                },
+                itemBuilder: (context, index, model) =>
+                    TodoCard(todoWithCategory: model),
               ),
             ),
-            // Expanded(
-            //   child: ref
-            //       .watch(getTodoWithCategoryProvider)
-            //       .when(
-            //         data: (List<TodoWithCategory> data) {
-            //           return ListView.builder(
-            //             itemCount: data.length,
-            //             itemBuilder: (context, index) {
-            //               final TodoWithCategory todoWithCategory = data[index];
-            //               return TodoCard(todoWithCategory: todoWithCategory);
-            //             },
-            //           );
-            //         },
-            //         error: (Object error, StackTrace stackTrace) {
-            //           return Text("error");
-            //         },
-            //         loading: () {
-            //           return Center(child: CircularProgressIndicator());
-            //         },
-            //       ),
-            // ),
           ],
         ),
       ),

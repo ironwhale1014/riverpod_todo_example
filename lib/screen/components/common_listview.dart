@@ -1,4 +1,5 @@
 import 'package:drift_todo_train/domain/base_model.dart';
+import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -23,7 +24,8 @@ class CommonListview<T extends BaseModel, U> extends ConsumerWidget {
       Model() => ListView.builder(
         itemCount: state.data.length,
         itemBuilder: (context, index) {
-          return itemBuilder(context, index, state.data[index]);
+          final U data = state.data[index];
+          return itemBuilder(context, index, data);
         },
       ),
     };
