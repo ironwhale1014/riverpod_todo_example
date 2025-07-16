@@ -16,6 +16,8 @@ class TodoEntries extends Table with PrimaryKey {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get dueDate => dateTime().nullable()();
+
+  IntColumn get category => integer().nullable().references(Categories, #id)();
 }
 
 @DataClassName('Category')
