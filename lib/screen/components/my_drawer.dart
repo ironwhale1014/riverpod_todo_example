@@ -65,7 +65,37 @@ class _CategoryDrawerEntry extends ConsumerWidget {
 
     if (categoryWithCount.category != null) {
       rowData.addAll([
-        IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+                Builder(
+          builder: (context) {
+            return IconButton(
+              onPressed: () {
+                final RenderBox renderBox = context.findRenderObject() as RenderBox;
+                final offset = renderBox.localToGlobal(Offset.zero);
+
+                showMenu(
+                  context: context,
+                  position: RelativeRect.fromLTRB(
+                    offset.dx + renderBox.size.width,
+                    offset.dy,
+                    offset.dx + renderBox.size.width,
+                    offset.dy,
+                  ),
+                  items: [
+                    PopupMenuItem(
+                      child: Text('수정하기'),
+                      onTap: () {},
+                    ),
+                    PopupMenuItem(
+                      child: Text('삭제하기'),
+                      onTap: () {},
+                    ),
+                  ],
+                );
+              },
+              icon: Icon(Icons.more_vert),
+            );
+          },
+        ),
       ]);
     } else {
       rowData.addAll([IconButton(onPressed: () {}, icon: Container())]);
