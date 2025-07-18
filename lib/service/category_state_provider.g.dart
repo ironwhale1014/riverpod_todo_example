@@ -1,26 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'todo_repository.dart';
+part of 'category_state_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$todoRepositoryHash() => r'dbf1dbc700184d6b6b540ea43c2d8a9d9e0de0c5';
+String _$categoryStateProviderHash() =>
+    r'd5352171bfaa2724c19afd005a7bcc274c0eb64d';
 
-/// See also [TodoRepository].
-@ProviderFor(TodoRepository)
-final todoRepositoryProvider =
-    AutoDisposeNotifierProvider<TodoRepository, void>.internal(
-      TodoRepository.new,
-      name: r'todoRepositoryProvider',
+/// See also [CategoryStateProvider].
+@ProviderFor(CategoryStateProvider)
+final categoryStateProviderProvider =
+    AutoDisposeNotifierProvider<CategoryStateProvider, Category?>.internal(
+      CategoryStateProvider.new,
+      name: r'categoryStateProviderProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$todoRepositoryHash,
+          : _$categoryStateProviderHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$TodoRepository = AutoDisposeNotifier<void>;
+typedef _$CategoryStateProvider = AutoDisposeNotifier<Category?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

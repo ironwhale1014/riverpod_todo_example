@@ -1,5 +1,12 @@
+import 'package:drift_todo_train/common/components/common_listview.dart';
 import 'package:drift_todo_train/common/components/custom_textfield.dart';
 import 'package:drift_todo_train/common/layout/default_layout.dart';
+import 'package:drift_todo_train/domain/base_model.dart';
+import 'package:drift_todo_train/domain/todo_with_category.dart';
+import 'package:drift_todo_train/screen/components/my_drawer.dart';
+import 'package:drift_todo_train/screen/components/todo_card.dart';
+import 'package:drift_todo_train/service/category_state_provider.dart';
+import 'package:drift_todo_train/service/todo_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -14,6 +21,7 @@ class HomePage extends HookConsumerWidget {
     final controller = useTextEditingController();
     return DefaultLayout(
       title: 'Home Page',
+      drawer: MyDrawer(),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Column(
@@ -21,9 +29,22 @@ class HomePage extends HookConsumerWidget {
             CustomTextfield(
               controller: controller,
               hintText: 'Write Todo list ',
-              onFieldSubmitted: (_) {
+              onFieldSubmitted: (_) async {
                 logger.d(controller.text.trim());
+                await ref
+                    .read(todoServiceProvider.notifier)
+                    .save(
+                      description: controller.text,
+                      category: ref.watch(categoryStateProviderProvider)?.id,
+                    );
+                controller.clear();
               },
+            ),
+            Expanded(
+              child: CommonListview<TodoWithCategory, BaseModel>(
+                provider: todoServiceProvider,
+                itemBuilder: (context, index, model) => TodoCard(model),
+              ),
             ),
           ],
         ),

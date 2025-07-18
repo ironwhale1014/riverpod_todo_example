@@ -27,6 +27,7 @@ class CustomDialog extends StatelessWidget {
         style: const TextStyle(fontSize: 16),
       ),
       content: child,
+      actionsAlignment: MainAxisAlignment.center,
       actions: [
         TextButton(onPressed: btnLeftFunc, child: Text(btnLeftText)),
         TextButton(onPressed: btnRightFunc, child: Text(btnRightText)),

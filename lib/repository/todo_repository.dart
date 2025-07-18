@@ -29,11 +29,6 @@ class TodoRepository extends _$TodoRepository {
     await ref.read(databaseProvider).todoEntries.deleteOne(todo);
   }
 
-  TodoWithCategory _mapRowToTodoWithCategory(row) => TodoWithCategory(
-    todoEntry: row.readTable(ref.read(databaseProvider).todoEntries),
-    category: row.readTableOrNull(ref.read(databaseProvider).categories),
-  );
-
   Future<List<TodoWithCategory>> getTodoWithCategory({
     int? categoryId,
     TodoFilter filter = TodoFilter.all,
@@ -63,4 +58,9 @@ class TodoRepository extends _$TodoRepository {
             .get();
     }
   }
+
+  TodoWithCategory _mapRowToTodoWithCategory(row) => TodoWithCategory(
+    todoEntry: row.readTable(ref.read(databaseProvider).todoEntries),
+    category: row.readTableOrNull(ref.read(databaseProvider).categories),
+  );
 }
