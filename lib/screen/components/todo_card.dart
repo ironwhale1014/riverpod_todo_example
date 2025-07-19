@@ -1,4 +1,5 @@
 import 'package:drift_todo_train/common/util/date_format.dart';
+import 'package:drift_todo_train/common/util/logger.dart';
 import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/domain/todo_with_category.dart';
 import 'package:drift_todo_train/screen/components/edit_dialog.dart';
@@ -22,7 +23,6 @@ class TodoCard extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: Card(
-
           color: todoEntry.isComplete ? Colors.greenAccent : Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -45,19 +45,40 @@ class TodoCard extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () {
-                    ref.read(todoServiceProvider.notifier).delete(todoEntry);
-                  },
-                  icon: Icon(Icons.delete),
-                ),
-                IconButton(
-                  onPressed: () {
-                    showDialog(
+                  onPressed: () async {
+                    final RenderBox renderBox =
+                        context.findRenderObject() as RenderBox;
+                    final offset = renderBox.localToGlobal(Offset.zero);
+                    final point1 = offset.dx + renderBox.size.width;
+                    final point2 = offset.dy + renderBox.size.height;
+                    final selectedValue = await showMenu(
+                      position: RelativeRect.fromLTRB(
+                        point1,
+                        point2,
+                        point1,
+                        point2,
+                      ),
                       context: context,
-                      builder: (_) => EditDialog( todoEntry),
+                      items: [
+                        PopupMenuItem(value: 'edit', child: Text('수정하기')),
+                        PopupMenuItem(value: 'delete', child: Text('삭제하기')),
+                      ],
                     );
+                    if (selectedValue != null) {
+                      switch (selectedValue) {
+                        case 'edit':
+                          showDialog(
+                            context: context,
+                            builder: (_) => EditDialog(todoEntry),
+                          );
+                        case 'delete':
+                          ref
+                              .read(todoServiceProvider.notifier)
+                              .delete(todoEntry);
+                      }
+                    }
                   },
-                  icon: Icon(Icons.edit),
+                  icon: Icon(Icons.more_vert),
                 ),
               ],
             ),
