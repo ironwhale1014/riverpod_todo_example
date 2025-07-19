@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CustomDialog extends StatelessWidget {
   const CustomDialog({
@@ -7,8 +8,8 @@ class CustomDialog extends StatelessWidget {
     this.child,
     this.btnLeftFunc,
     this.btnRightFunc,
-    required this.btnLeftText,
-    required this.btnRightText,
+    this.btnLeftText = 'Cancel',
+    this.btnRightText = 'OK',
   });
 
   final String titleText;
@@ -29,7 +30,14 @@ class CustomDialog extends StatelessWidget {
       content: child,
       actionsAlignment: MainAxisAlignment.center,
       actions: [
-        TextButton(onPressed: btnLeftFunc, child: Text(btnLeftText)),
+        TextButton(
+          onPressed:
+              btnLeftFunc ??
+              () {
+                context.pop();
+              },
+          child: Text(btnLeftText),
+        ),
         TextButton(onPressed: btnRightFunc, child: Text(btnRightText)),
       ],
     );

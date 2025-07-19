@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:drift/drift.dart';
+import 'package:drift_todo_train/common/util/logger.dart';
 import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/domain/base_model.dart';
 import 'package:drift_todo_train/domain/category_with_count.dart';
@@ -18,6 +20,9 @@ class CategoryService extends _$CategoryService {
   }
 
   Future<void> save({required String name}) async {
+    if (name.trim() == '기본') {
+      return;
+    }
     final random = Random();
     final color = Colors.primaries[random.nextInt(Colors.primaries.length)];
     await ref
@@ -25,7 +30,7 @@ class CategoryService extends _$CategoryService {
         .save(CategoriesCompanion.insert(name: name, color: color));
 
     if (state is Model) {
-      paginate();
+      await paginate();
     }
   }
 
@@ -34,6 +39,31 @@ class CategoryService extends _$CategoryService {
         .read(categoryRepositoryProvider.notifier)
         .getCategoryWithCount();
 
+    logger.d('paginate: ${datas.length}');
+
     state = Model(datas);
+  }
+
+  Future<void> update(Category category) async {
+    final db = ref.read(databaseProvider);
+    await db.categories.replaceOne(category);
+    paginate();
+  }
+
+  Future<void> delete(Category category) async {
+    logger.d('delete category: ${category.name}');
+    final db = ref.read(databaseProvider);
+    await db.transaction(() async {
+      await (db.todoEntries.update()
+            ..where((todo) => todo.category.equals(category.id)))
+          .write(TodoEntriesCompanion(category: Value(null)));
+
+      await db.categories.deleteOne(category);
+
+      if (state is Model) {
+        await paginate();
+        logger.d('paginate in delete');
+      }
+    });
   }
 }

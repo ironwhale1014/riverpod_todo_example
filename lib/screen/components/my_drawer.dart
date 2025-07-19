@@ -1,9 +1,13 @@
 import 'package:drift_todo_train/common/components/common_listview.dart';
+import 'package:drift_todo_train/common/components/custom_dialog.dart';
 import 'package:drift_todo_train/common/components/custom_textfield.dart';
 import 'package:drift_todo_train/domain/base_model.dart';
 import 'package:drift_todo_train/domain/category_with_count.dart';
+import 'package:drift_todo_train/screen/components/category_edit_dialog.dart';
 import 'package:drift_todo_train/service/category_service.dart';
+import 'package:drift_todo_train/service/category_state_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class MyDrawer extends ConsumerWidget {
@@ -50,6 +54,9 @@ class _CategoryDrawerEntry extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isSelected =
+        ref.watch(categoryStateProviderProvider)?.id ==
+        categoryWithCount.category?.id;
     final rowData = [
       DecoratedBox(
         decoration: BoxDecoration(
@@ -65,14 +72,15 @@ class _CategoryDrawerEntry extends ConsumerWidget {
 
     if (categoryWithCount.category != null) {
       rowData.addAll([
-                Builder(
+        Builder(
           builder: (context) {
             return IconButton(
-              onPressed: () {
-                final RenderBox renderBox = context.findRenderObject() as RenderBox;
+              onPressed: () async {
+                final RenderBox renderBox =
+                    context.findRenderObject() as RenderBox;
                 final offset = renderBox.localToGlobal(Offset.zero);
 
-                showMenu(
+                final selectedValue = await showMenu(
                   context: context,
                   position: RelativeRect.fromLTRB(
                     offset.dx + renderBox.size.width,
@@ -81,16 +89,44 @@ class _CategoryDrawerEntry extends ConsumerWidget {
                     offset.dy,
                   ),
                   items: [
-                    PopupMenuItem(
-                      child: Text('수정하기'),
-                      onTap: () {},
-                    ),
-                    PopupMenuItem(
-                      child: Text('삭제하기'),
-                      onTap: () {},
-                    ),
+                    PopupMenuItem(value: 'edit', child: Text('수정하기')),
+                    PopupMenuItem(value: 'delete', child: Text('삭제하기')),
                   ],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 );
+
+                if (selectedValue != null) {
+                  switch (selectedValue) {
+                    case 'edit':
+                      showDialog(
+                        context: context,
+                        builder: (context) =>
+                            CategoryEditDialog(categoryWithCount.category!),
+                      );
+                    case 'delete':
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return CustomDialog(
+                            titleText: 'delete it?',
+                            btnLeftText: 'Cancel',
+                            btnRightText: 'Ok',
+                            btnLeftFunc: () {
+                              context.pop();
+                            },
+                            btnRightFunc: () async {
+                              await ref
+                                  .read(categoryServiceProvider.notifier)
+                                  .delete(categoryWithCount.category!);
+                              context.pop();
+                            },
+                          );
+                        },
+                      );
+                  }
+                }
               },
               icon: Icon(Icons.more_vert),
             );
@@ -100,9 +136,24 @@ class _CategoryDrawerEntry extends ConsumerWidget {
     } else {
       rowData.addAll([IconButton(onPressed: () {}, icon: Container())]);
     }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: rowData,
+    return InkWell(
+      onTap: () {
+        ref
+            .read(categoryStateProviderProvider.notifier)
+            .changeCategory(categoryWithCount.category);
+        context.pop();
+      },
+      child: Material(
+        borderRadius: BorderRadius.circular(8),
+        color: isSelected ? Colors.orangeAccent[100] : Colors.transparent,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: rowData,
+          ),
+        ),
+      ),
     );
   }
 }
