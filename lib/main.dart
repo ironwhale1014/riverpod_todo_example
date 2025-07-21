@@ -14,7 +14,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = GoRouter(
-      routes: [GoRoute(path: '/', name: 'home', builder: (_, _) => HomePage())],
+      routes: [GoRoute(path: '/', name: 'home', builder: (_, _) =>
+
+          HomePage())],
     );
     return MaterialApp.router(
       routerConfig: config,

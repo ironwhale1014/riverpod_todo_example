@@ -1,4 +1,6 @@
+import 'package:drift_todo_train/common/components/more_options_button.dart';
 import 'package:drift_todo_train/common/util/date_format.dart';
+import 'package:drift_todo_train/common/util/dialog_utils.dart';
 import 'package:drift_todo_train/common/util/logger.dart';
 import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/domain/todo_with_category.dart';
@@ -44,41 +46,21 @@ class TodoCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-                IconButton(
-                  onPressed: () async {
-                    final RenderBox renderBox =
-                        context.findRenderObject() as RenderBox;
-                    final offset = renderBox.localToGlobal(Offset.zero);
-                    final point1 = offset.dx + renderBox.size.width;
-                    final point2 = offset.dy + renderBox.size.height;
-                    final selectedValue = await showMenu(
-                      position: RelativeRect.fromLTRB(
-                        point1,
-                        point2,
-                        point1,
-                        point2,
-                      ),
+                MoreOptionsButton(
+                  onEdit: () {
+                    showDialog(
                       context: context,
-                      items: [
-                        PopupMenuItem(value: 'edit', child: Text('수정하기')),
-                        PopupMenuItem(value: 'delete', child: Text('삭제하기')),
-                      ],
+                      builder: (_) => EditDialog(todoEntry),
                     );
-                    if (selectedValue != null) {
-                      switch (selectedValue) {
-                        case 'edit':
-                          showDialog(
-                            context: context,
-                            builder: (_) => EditDialog(todoEntry),
-                          );
-                        case 'delete':
-                          ref
-                              .read(todoServiceProvider.notifier)
-                              .delete(todoEntry);
-                      }
-                    }
                   },
-                  icon: Icon(Icons.more_vert),
+                  onDelete: () {
+                    DialogUtils.showDeleteConfirmation(
+                      context,
+                      onConfirm: () => ref
+                          .read(todoServiceProvider.notifier)
+                          .delete(todoEntry),
+                    );
+                  },
                 ),
               ],
             ),
