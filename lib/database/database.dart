@@ -7,17 +7,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'database.g.dart';
 
 
-// 전역에서 단일 인스턴스를 재사용
-final _appDbSingleton = AppDatabase();
-
-@Riverpod(keepAlive: true)
-AppDatabase appDatabase(Ref ref) {
-
-  ref.onDispose(() => _appDbSingleton.close());
-  return _appDbSingleton;
-}
-
-
 @DriftDatabase(tables: [Categories, TodoEntries])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(LazyDatabase(_openConnection));
@@ -32,4 +21,11 @@ LazyDatabase _openConnection() {
   });
 }
 
+// 전역에서 단일 인스턴스를 재사용
+final _appDbSingleton = AppDatabase();
 
+@Riverpod(keepAlive: true)
+AppDatabase appDatabase(Ref ref) {
+  ref.onDispose(() => _appDbSingleton.close());
+  return _appDbSingleton;
+}
