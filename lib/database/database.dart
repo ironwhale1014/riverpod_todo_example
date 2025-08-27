@@ -1,13 +1,19 @@
+import 'dart:ui' show Color;
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:drift_todo_train/common/util/get_db_file.dart';
+import 'package:drift_todo_train/database/converter/color_converter.dart';
+import 'package:drift_todo_train/database/dao.dart';
 import 'package:drift_todo_train/database/tables.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'database.g.dart';
 
-
-@DriftDatabase(tables: [Categories, TodoEntries])
+@DriftDatabase(
+  tables: [CategoryEntries, TodoEntries],
+  daos: [TodoDao, CategoryDao], // DAO 추가
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(LazyDatabase(_openConnection));
 

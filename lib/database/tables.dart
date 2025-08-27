@@ -1,7 +1,5 @@
-import 'dart:ui' show Color;
-export 'dart:ui' show Color;
-
 import 'package:drift/drift.dart';
+import 'package:drift_todo_train/database/converter/color_converter.dart';
 
 mixin PrimaryKey on Table {
   IntColumn get id => integer().autoIncrement()();
@@ -13,20 +11,13 @@ class TodoEntries extends Table with PrimaryKey {
 
   DateTimeColumn get dueData => dateTime().nullable()();
 
-  IntColumn get category => integer().nullable().references(Categories, #id)();
+  IntColumn get category =>
+      integer().nullable().references(CategoryEntries, #id)();
 }
 
-@DataClassName('Category')
-class Categories extends Table with PrimaryKey {
+@DataClassName('CategoryEntry')
+class CategoryEntries extends Table with PrimaryKey {
   TextColumn get name => text()();
 
-  IntColumn get color => integer().map(ColorConverter())();
-}
-
-class ColorConverter extends TypeConverter<Color, int> {
-  @override
-  Color fromSql(int fromDb) => Color(fromDb);
-
-  @override
-  int toSql(Color value) => value.toARGB32();
+  IntColumn get color => integer().map(const ColorConverter())();
 }
