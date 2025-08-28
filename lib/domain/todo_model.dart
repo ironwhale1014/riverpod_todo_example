@@ -17,12 +17,4 @@ abstract class TodoModel with _$TodoModel {
 
   factory TodoModel.fromJson(Map<String, Object?> json) =>
       _$TodoModelFromJson(json);
-
-  factory TodoModel.fromTbl(TodoEntry entry, Category? category) {
-    return TodoModel(
-      id: entry.id,
-      description: entry.description,
-      category: category,
-    );
-  }
 }

@@ -11,15 +11,12 @@ part 'category.g.dart';
 @freezed
 abstract class Category with _$Category {
   const factory Category({
-    required int id,
-    required String name,
-    @ColorConverter() required Color color,
+    required int? id,
+    required String? name,
+    required int count,
+    @ColorConverter() required Color? color,
   }) = _Category;
 
   factory Category.fromJson(Map<String, Object?> json) =>
       _$CategoryFromJson(json);
-
-  factory Category.fromTbl(CategoryEntry entry) {
-    return Category(id: entry.id, name: entry.name, color: entry.color);
-  }
 }

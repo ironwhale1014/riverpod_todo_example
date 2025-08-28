@@ -1,0 +1,9 @@
+import 'tables.dart';
+
+
+getCategoryWithCount : SELECT c.*, (SELECT COUNT(*) FROM todo_entries WHERE todo_entries.category = c.id) as amount
+                       FROM category_entries c
+                       UNION ALL
+                       SELECT null, null, null, (SELECT COUNT(*) FROM todo_entries WHERE todo_entries.category IS NULL );
+
+
