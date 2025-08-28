@@ -1,11 +1,9 @@
 import 'dart:ui';
 
 import 'package:drift_todo_train/database/converter/color_converter.dart';
-import 'package:drift_todo_train/database/database.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'category.freezed.dart';
-
 part 'category.g.dart';
 
 @freezed
