@@ -1,12 +1,12 @@
 import 'dart:math';
-import 'dart:ui';
-
 import 'package:drift/drift.dart';
 import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/database/tables.dart';
 import 'package:drift_todo_train/domain/category.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../common/util/logger.dart';
 
 part 'category_repository.g.dart';
 
@@ -16,9 +16,7 @@ CategoryDao categoryRepository(Ref ref) {
   return db.categoryDao;
 }
 
-@DriftAccessor(
-  tables: [CategoryEntries, TodoEntries],
-) // Only needs CategoryEntries
+@DriftAccessor(tables: [CategoryEntries, TodoEntries])
 class CategoryDao extends DatabaseAccessor<AppDatabase>
     with _$CategoryDaoMixin {
   CategoryDao(super.db);
@@ -34,9 +32,35 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     }).get();
   }
 
-  Future<Category> getCategoryById(int? id) async {
-    final categoriesWithCount = await getCategoriesWithCount();
-    return categoriesWithCount.where((element) => element.id == id).first;
+  Future<Category> getCategoryById(int? categoryId) async {
+    try {
+      final query = selectOnly(todoEntries)
+        ..addColumns([todoEntries.id.count()]);
+
+      CategoryEntry? categoryEntry;
+      int count = 0;
+
+      if (categoryId != null) {
+        categoryEntry = await (select(
+          categoryEntries,
+        )..where((e) => e.id.equals(categoryId))).getSingle();
+
+        final countResult =
+            await (query..where(todoEntries.category.equals(categoryId)))
+                .getSingle();
+        count = countResult.read(todoEntries.id.count()) ?? 0;
+      }
+
+      return Category(
+        id: categoryEntry?.id,
+        name: categoryEntry?.name,
+        count: count,
+        color: categoryEntry?.color,
+      );
+    } catch (e, s) {
+      logger.e('getCategoryById failed: id=$categoryId', e, s);
+      rethrow;
+    }
   }
 
   Future<void> deleteCategory(Category category) async {
