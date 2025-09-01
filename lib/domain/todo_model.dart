@@ -1,9 +1,7 @@
-import 'package:drift_todo_train/database/database.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:drift_todo_train/domain/category.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'todo_model.freezed.dart';
-
 part 'todo_model.g.dart';
 
 @freezed

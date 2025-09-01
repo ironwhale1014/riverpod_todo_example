@@ -25,13 +25,21 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
   TodoDao(super.db);
 
   // Method to watch todos with their categories
-  Future<List<TodoModel>> getTodosWithCategoryEntries() async {
+  Future<List<TodoModel>> getTodosWithCategoryEntries(
+    Category? category,
+  ) async {
     final query = select(todoEntries).join([
       leftOuterJoin(
         categoryEntries,
         categoryEntries.id.equalsExp(todoEntries.category),
       ),
     ]);
+
+    if (category != null) {
+      query.where(todoEntries.category.equals(category.id!));
+    } else {
+      query.where(todoEntries.category.isNull());
+    }
 
     final List<TodoWithCategoryFromEntry> todos = (await query.get())
         .map(_mapper)
@@ -56,10 +64,13 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
     );
   }
 
-  Future<TodoModel> createTodoEntry(TodoModel todoModel) async {
+  Future<TodoModel> createTodoEntry(
+    String description,
+    Category? category,
+  ) async {
     final todo = TodoEntriesCompanion.insert(
-      description: todoModel.description,
-      category: Value(todoModel.category?.id),
+      description: description,
+      category: Value(category?.id),
     );
 
     final id = await todoEntries.insertOne(todo);
