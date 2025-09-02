@@ -7,19 +7,22 @@ part 'category_service.g.dart';
 
 @riverpod
 class CategoryService extends _$CategoryService {
-  late final CategoryDao categoryRepository;
-
   @override
   BaseStateModel<Category> build() {
-    categoryRepository = ref.watch(categoryRepositoryProvider);
     paginate();
     return Loading();
   }
 
   Future<void> paginate() async {
-    final List<Category> category = await categoryRepository
+    final List<Category> category = await ref
+        .read(categoryRepositoryProvider)
         .getCategoriesWithCount();
 
     state = LoadedModel(category);
+  }
+
+  Future<void> saveCategory(String name) async {
+    await ref.read(categoryRepositoryProvider).createCategory(name: name);
+    ref.invalidateSelf();
   }
 }

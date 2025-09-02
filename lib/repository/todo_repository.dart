@@ -35,7 +35,7 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
       ),
     ]);
 
-    if (category != null) {
+    if (category!.id != null) {
       query.where(todoEntries.category.equals(category.id!));
     } else {
       query.where(todoEntries.category.isNull());
@@ -77,24 +77,20 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
     return getTodoById(id);
   }
 
-  Future<TodoModel> updateTodoEntry(TodoModel todoModel) async {
-    final todoEntry = await _findByIdTodoEntry(todoModel.id);
-
-    await todoEntries.replaceOne(
-      todoEntry.copyWith(
+  Future<void> updateTodoEntry(TodoModel todoModel) async {
+    await (update(
+      todoEntries,
+    )..where(((e) => e.id.equals(todoModel.id)))).write(
+      TodoEntriesCompanion.insert(
         description: todoModel.description,
+        dueData: Value(todoModel.dueDate),
         category: Value(todoModel.category?.id),
       ),
     );
-    return getTodoById(todoModel.id);
   }
 
-  Future<void> deleteTodoEntry(TodoEntry todo) async {
-    await todoEntries.deleteOne(todo);
-  }
-
-  Future<TodoEntry> _findByIdTodoEntry(int id) async {
-    return (select(todoEntries)..where((row) => row.id.equals(id))).getSingle();
+  Future<void> deleteTodoEntry(TodoModel todo) async {
+    await (delete(todoEntries)..where((row) => row.id.equals(todo.id))).go();
   }
 
   TodoModel _todoModelMapper(row) => TodoModel(
