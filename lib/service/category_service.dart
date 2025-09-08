@@ -25,4 +25,14 @@ class CategoryService extends _$CategoryService {
     await ref.read(categoryRepositoryProvider).createCategory(name: name);
     ref.invalidateSelf();
   }
+
+  Future<void> deleteCategory(Category category) async {
+    await ref.read(categoryRepositoryProvider).deleteCategory(category);
+    ref.invalidateSelf();
+  }
+
+  Future<void> updateCategory(Category category) async {
+    await ref.read(categoryRepositoryProvider).updateCategory(category);
+    ref.invalidateSelf();
+  }
 }

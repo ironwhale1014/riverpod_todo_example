@@ -35,7 +35,7 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
       ),
     ]);
 
-    if (category!.id != null) {
+    if (category != null && category.id != null) {
       query.where(todoEntries.category.equals(category.id!));
     } else {
       query.where(todoEntries.category.isNull());
@@ -45,7 +45,9 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
         .map(_mapper)
         .toList();
 
-    return todos.map(_todoModelMapper).toList();
+    final count = todos.length;
+
+    return todos.map((row) => _todoModelMapper(row, count)).toList();
   }
 
   Future<TodoModel> getTodoById(int id) async {
@@ -93,7 +95,7 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
     await (delete(todoEntries)..where((row) => row.id.equals(todo.id))).go();
   }
 
-  TodoModel _todoModelMapper(row) => TodoModel(
+  TodoModel _todoModelMapper(row, count) => TodoModel(
     id: row.todo.id,
     description: row.todo.description,
     category: (row.category != null)
@@ -101,7 +103,7 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
             id: row.category!.id,
             name: row.category!.name,
             color: row.category!.color,
-            count: row.category.count,
+            count: count,
           )
         : null,
   );
