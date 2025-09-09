@@ -293,6 +293,19 @@ class $TodoEntriesTable extends TodoEntries
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _isDoneMeta = const VerificationMeta('isDone');
+  @override
+  late final GeneratedColumn<bool> isDone = GeneratedColumn<bool>(
+    'is_done',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_done" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _categoryMeta = const VerificationMeta(
     'category',
   );
@@ -308,7 +321,13 @@ class $TodoEntriesTable extends TodoEntries
     ),
   );
   @override
-  List<GeneratedColumn> get $columns => [id, description, dueData, category];
+  List<GeneratedColumn> get $columns => [
+    id,
+    description,
+    dueData,
+    isDone,
+    category,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -341,6 +360,12 @@ class $TodoEntriesTable extends TodoEntries
         dueData.isAcceptableOrUnknown(data['due_data']!, _dueDataMeta),
       );
     }
+    if (data.containsKey('is_done')) {
+      context.handle(
+        _isDoneMeta,
+        isDone.isAcceptableOrUnknown(data['is_done']!, _isDoneMeta),
+      );
+    }
     if (data.containsKey('category')) {
       context.handle(
         _categoryMeta,
@@ -368,6 +393,10 @@ class $TodoEntriesTable extends TodoEntries
         DriftSqlType.dateTime,
         data['${effectivePrefix}due_data'],
       ),
+      isDone: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_done'],
+      )!,
       category: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}category'],
@@ -385,11 +414,13 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
   final int id;
   final String description;
   final DateTime? dueData;
+  final bool isDone;
   final int? category;
   const TodoEntry({
     required this.id,
     required this.description,
     this.dueData,
+    required this.isDone,
     this.category,
   });
   @override
@@ -400,6 +431,7 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
     if (!nullToAbsent || dueData != null) {
       map['due_data'] = Variable<DateTime>(dueData);
     }
+    map['is_done'] = Variable<bool>(isDone);
     if (!nullToAbsent || category != null) {
       map['category'] = Variable<int>(category);
     }
@@ -413,6 +445,7 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
       dueData: dueData == null && nullToAbsent
           ? const Value.absent()
           : Value(dueData),
+      isDone: Value(isDone),
       category: category == null && nullToAbsent
           ? const Value.absent()
           : Value(category),
@@ -428,6 +461,7 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
       id: serializer.fromJson<int>(json['id']),
       description: serializer.fromJson<String>(json['description']),
       dueData: serializer.fromJson<DateTime?>(json['dueData']),
+      isDone: serializer.fromJson<bool>(json['isDone']),
       category: serializer.fromJson<int?>(json['category']),
     );
   }
@@ -438,6 +472,7 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
       'id': serializer.toJson<int>(id),
       'description': serializer.toJson<String>(description),
       'dueData': serializer.toJson<DateTime?>(dueData),
+      'isDone': serializer.toJson<bool>(isDone),
       'category': serializer.toJson<int?>(category),
     };
   }
@@ -446,11 +481,13 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
     int? id,
     String? description,
     Value<DateTime?> dueData = const Value.absent(),
+    bool? isDone,
     Value<int?> category = const Value.absent(),
   }) => TodoEntry(
     id: id ?? this.id,
     description: description ?? this.description,
     dueData: dueData.present ? dueData.value : this.dueData,
+    isDone: isDone ?? this.isDone,
     category: category.present ? category.value : this.category,
   );
   TodoEntry copyWithCompanion(TodoEntriesCompanion data) {
@@ -460,6 +497,7 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
           ? data.description.value
           : this.description,
       dueData: data.dueData.present ? data.dueData.value : this.dueData,
+      isDone: data.isDone.present ? data.isDone.value : this.isDone,
       category: data.category.present ? data.category.value : this.category,
     );
   }
@@ -470,13 +508,14 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
           ..write('id: $id, ')
           ..write('description: $description, ')
           ..write('dueData: $dueData, ')
+          ..write('isDone: $isDone, ')
           ..write('category: $category')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, description, dueData, category);
+  int get hashCode => Object.hash(id, description, dueData, isDone, category);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -484,6 +523,7 @@ class TodoEntry extends DataClass implements Insertable<TodoEntry> {
           other.id == this.id &&
           other.description == this.description &&
           other.dueData == this.dueData &&
+          other.isDone == this.isDone &&
           other.category == this.category);
 }
 
@@ -491,29 +531,34 @@ class TodoEntriesCompanion extends UpdateCompanion<TodoEntry> {
   final Value<int> id;
   final Value<String> description;
   final Value<DateTime?> dueData;
+  final Value<bool> isDone;
   final Value<int?> category;
   const TodoEntriesCompanion({
     this.id = const Value.absent(),
     this.description = const Value.absent(),
     this.dueData = const Value.absent(),
+    this.isDone = const Value.absent(),
     this.category = const Value.absent(),
   });
   TodoEntriesCompanion.insert({
     this.id = const Value.absent(),
     required String description,
     this.dueData = const Value.absent(),
+    this.isDone = const Value.absent(),
     this.category = const Value.absent(),
   }) : description = Value(description);
   static Insertable<TodoEntry> custom({
     Expression<int>? id,
     Expression<String>? description,
     Expression<DateTime>? dueData,
+    Expression<bool>? isDone,
     Expression<int>? category,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (description != null) 'description': description,
       if (dueData != null) 'due_data': dueData,
+      if (isDone != null) 'is_done': isDone,
       if (category != null) 'category': category,
     });
   }
@@ -522,12 +567,14 @@ class TodoEntriesCompanion extends UpdateCompanion<TodoEntry> {
     Value<int>? id,
     Value<String>? description,
     Value<DateTime?>? dueData,
+    Value<bool>? isDone,
     Value<int?>? category,
   }) {
     return TodoEntriesCompanion(
       id: id ?? this.id,
       description: description ?? this.description,
       dueData: dueData ?? this.dueData,
+      isDone: isDone ?? this.isDone,
       category: category ?? this.category,
     );
   }
@@ -544,6 +591,9 @@ class TodoEntriesCompanion extends UpdateCompanion<TodoEntry> {
     if (dueData.present) {
       map['due_data'] = Variable<DateTime>(dueData.value);
     }
+    if (isDone.present) {
+      map['is_done'] = Variable<bool>(isDone.value);
+    }
     if (category.present) {
       map['category'] = Variable<int>(category.value);
     }
@@ -556,6 +606,7 @@ class TodoEntriesCompanion extends UpdateCompanion<TodoEntry> {
           ..write('id: $id, ')
           ..write('description: $description, ')
           ..write('dueData: $dueData, ')
+          ..write('isDone: $isDone, ')
           ..write('category: $category')
           ..write(')'))
         .toString();
@@ -868,6 +919,7 @@ typedef $$TodoEntriesTableCreateCompanionBuilder =
       Value<int> id,
       required String description,
       Value<DateTime?> dueData,
+      Value<bool> isDone,
       Value<int?> category,
     });
 typedef $$TodoEntriesTableUpdateCompanionBuilder =
@@ -875,6 +927,7 @@ typedef $$TodoEntriesTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> description,
       Value<DateTime?> dueData,
+      Value<bool> isDone,
       Value<int?> category,
     });
 
@@ -926,6 +979,11 @@ class $$TodoEntriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get isDone => $composableBuilder(
+    column: $table.isDone,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$CategoryEntriesTableFilterComposer get category {
     final $$CategoryEntriesTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -974,6 +1032,11 @@ class $$TodoEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isDone => $composableBuilder(
+    column: $table.isDone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CategoryEntriesTableOrderingComposer get category {
     final $$CategoryEntriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -1017,6 +1080,9 @@ class $$TodoEntriesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get dueData =>
       $composableBuilder(column: $table.dueData, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDone =>
+      $composableBuilder(column: $table.isDone, builder: (column) => column);
 
   $$CategoryEntriesTableAnnotationComposer get category {
     final $$CategoryEntriesTableAnnotationComposer composer = $composerBuilder(
@@ -1073,11 +1139,13 @@ class $$TodoEntriesTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> description = const Value.absent(),
                 Value<DateTime?> dueData = const Value.absent(),
+                Value<bool> isDone = const Value.absent(),
                 Value<int?> category = const Value.absent(),
               }) => TodoEntriesCompanion(
                 id: id,
                 description: description,
                 dueData: dueData,
+                isDone: isDone,
                 category: category,
               ),
           createCompanionCallback:
@@ -1085,11 +1153,13 @@ class $$TodoEntriesTableTableManager
                 Value<int> id = const Value.absent(),
                 required String description,
                 Value<DateTime?> dueData = const Value.absent(),
+                Value<bool> isDone = const Value.absent(),
                 Value<int?> category = const Value.absent(),
               }) => TodoEntriesCompanion.insert(
                 id: id,
                 description: description,
                 dueData: dueData,
+                isDone: isDone,
                 category: category,
               ),
           withReferenceMapper: (p0) => p0

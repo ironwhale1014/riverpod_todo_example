@@ -38,7 +38,7 @@ final class CategoryServiceProvider
   }
 }
 
-String _$categoryServiceHash() => r'a90f74498a8f7b5a24005f15e954a18a9ecd4e81';
+String _$categoryServiceHash() => r'953a33dd187ce90ed5b12fa9423fc0f72f38b670';
 
 abstract class _$CategoryService extends $Notifier<BaseStateModel<Category>> {
   BaseStateModel<Category> build();

@@ -23,8 +23,13 @@ class TodoService extends _$TodoService {
     state = LoadedModel(todosWithCategory);
   }
 
+  Future<void> toggle(bool isDone, TodoModel todoModel) async {
+    await ref
+        .read(todoRepositoryProvider)
+        .updateTodoEntry(todoModel.copyWith(isDone: isDone));
+  }
+
   Future<void> save(String description, DateTime? dueDate) async {
-    logger.d(dueDate);
     final category = ref.read(categoryStateProvider);
     ref
         .read(todoRepositoryProvider)
@@ -33,7 +38,7 @@ class TodoService extends _$TodoService {
   }
 
   Future<void> update(TodoModel todoModel) async {
-    ref.read(todoRepositoryProvider).updateTodoEntry(todoModel);
+    await ref.read(todoRepositoryProvider).updateTodoEntry(todoModel);
     ref.invalidateSelf();
   }
 

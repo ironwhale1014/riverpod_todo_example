@@ -9,6 +9,7 @@ abstract class TodoModel with _$TodoModel {
   const factory TodoModel({
     required int id,
     required String description,
+    required bool isDone,
     DateTime? dueDate,
     Category? category,
   }) = _TodoModel;

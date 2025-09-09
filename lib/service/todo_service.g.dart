@@ -38,7 +38,7 @@ final class TodoServiceProvider
   }
 }
 
-String _$todoServiceHash() => r'ff8c9b0a35570cdda6aafbdd56bafa8b2d5f3ebb';
+String _$todoServiceHash() => r'faa133568e0cdd6794988496b5d3d940f8e6967f';
 
 abstract class _$TodoService extends $Notifier<BaseStateModel<TodoModel>> {
   BaseStateModel<TodoModel> build();

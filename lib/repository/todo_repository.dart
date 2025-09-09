@@ -62,6 +62,7 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
     return TodoModel(
       id: todoEntry.id,
       description: todoEntry.description,
+      isDone: todoEntry.isDone,
       category: category,
     );
   }
@@ -75,6 +76,7 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
       description: description,
       category: Value(category?.id),
       dueData: Value(dueDate),
+      isDone: Value(false),
     );
 
     final id = await todoEntries.insertOne(todo);
@@ -89,6 +91,7 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
         description: todoModel.description,
         dueData: Value(todoModel.dueDate),
         category: Value(todoModel.category?.id),
+        isDone: Value(todoModel.isDone),
       ),
     );
   }
@@ -97,19 +100,21 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
     await (delete(todoEntries)..where((row) => row.id.equals(todo.id))).go();
   }
 
-  TodoModel _todoModelMapper(row, count) => TodoModel(
-    id: row.todo.id,
-    description: row.todo.description,
-    dueDate: row.todo.dueData,
-    category: (row.category != null)
-        ? Category(
-            id: row.category!.id,
-            name: row.category!.name,
-            color: row.category!.color,
-            count: count,
-          )
-        : null,
-  );
+  TodoModel _todoModelMapper(TodoWithCategoryFromEntry row, int count) =>
+      TodoModel(
+        id: row.todo.id,
+        description: row.todo.description,
+        dueDate: row.todo.dueData,
+        isDone: row.todo.isDone,
+        category: (row.category != null)
+            ? Category(
+                id: row.category!.id,
+                name: row.category!.name,
+                color: row.category!.color,
+                count: count,
+              )
+            : null,
+      );
 
   TodoWithCategoryFromEntry _mapper(row) => TodoWithCategoryFromEntry(
     todo: row.readTable(todoEntries),

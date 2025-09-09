@@ -9,6 +9,7 @@ part of 'todo_model.dart';
 _TodoModel _$TodoModelFromJson(Map<String, dynamic> json) => _TodoModel(
   id: (json['id'] as num).toInt(),
   description: json['description'] as String,
+  isDone: json['isDone'] as bool,
   dueDate: json['dueDate'] == null
       ? null
       : DateTime.parse(json['dueDate'] as String),
@@ -21,6 +22,7 @@ Map<String, dynamic> _$TodoModelToJson(_TodoModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'description': instance.description,
+      'isDone': instance.isDone,
       'dueDate': instance.dueDate?.toIso8601String(),
       'category': instance.category,
     };

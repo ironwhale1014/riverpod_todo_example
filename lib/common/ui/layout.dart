@@ -7,11 +7,13 @@ class DefaultLayout extends ConsumerWidget {
     this.title,
     required this.child,
     this.drawer,
+    this.actions,
   });
 
   final String? title;
   final Widget child;
   final Widget? drawer;
+  final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,7 +27,7 @@ class DefaultLayout extends ConsumerWidget {
 
   AppBar? _renderAppbar() {
     if (title != null) {
-      return AppBar(title: Text(title!));
+      return AppBar(title: Text(title!), actions: actions);
     }
     return null;
   }

@@ -21,18 +21,20 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultLayout(
       drawer: CustomDrawer(),
+      actions: [
+        IconButton(
+          onPressed: () {
+            showAddTodoDialog(context);
+          },
+          icon: Icon(Icons.edit),
+        ),
+      ],
       title: ref.watch(categoryStateProvider)?.name ?? '기본',
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ElevatedButton(
-              onPressed: () {
-                showAddTodoDialog(context);
-              },
-              child: Text('+ add Todo'),
-            ),
             Expanded(
               child: CommonListview<TodoModel, BaseStateModel<TodoModel>>(
                 provider: todoServiceProvider,

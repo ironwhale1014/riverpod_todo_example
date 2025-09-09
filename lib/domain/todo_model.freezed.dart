@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TodoModel {
 
- int get id; String get description; DateTime? get dueDate; Category? get category;
+ int get id; String get description; bool get isDone; DateTime? get dueDate; Category? get category;
 /// Create a copy of TodoModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $TodoModelCopyWith<TodoModel> get copyWith => _$TodoModelCopyWithImpl<TodoModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TodoModel&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.category, category) || other.category == category));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TodoModel&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.isDone, isDone) || other.isDone == isDone)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.category, category) || other.category == category));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,description,dueDate,category);
+int get hashCode => Object.hash(runtimeType,id,description,isDone,dueDate,category);
 
 @override
 String toString() {
-  return 'TodoModel(id: $id, description: $description, dueDate: $dueDate, category: $category)';
+  return 'TodoModel(id: $id, description: $description, isDone: $isDone, dueDate: $dueDate, category: $category)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $TodoModelCopyWith<$Res>  {
   factory $TodoModelCopyWith(TodoModel value, $Res Function(TodoModel) _then) = _$TodoModelCopyWithImpl;
 @useResult
 $Res call({
- int id, String description, DateTime? dueDate, Category? category
+ int id, String description, bool isDone, DateTime? dueDate, Category? category
 });
 
 
@@ -65,11 +65,12 @@ class _$TodoModelCopyWithImpl<$Res>
 
 /// Create a copy of TodoModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? dueDate = freezed,Object? category = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? isDone = null,Object? dueDate = freezed,Object? category = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String,dueDate: freezed == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable
+as String,isDone: null == isDone ? _self.isDone : isDone // ignore: cast_nullable_to_non_nullable
+as bool,dueDate: freezed == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as Category?,
   ));
@@ -168,10 +169,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String description,  DateTime? dueDate,  Category? category)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String description,  bool isDone,  DateTime? dueDate,  Category? category)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TodoModel() when $default != null:
-return $default(_that.id,_that.description,_that.dueDate,_that.category);case _:
+return $default(_that.id,_that.description,_that.isDone,_that.dueDate,_that.category);case _:
   return orElse();
 
 }
@@ -189,10 +190,10 @@ return $default(_that.id,_that.description,_that.dueDate,_that.category);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String description,  DateTime? dueDate,  Category? category)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String description,  bool isDone,  DateTime? dueDate,  Category? category)  $default,) {final _that = this;
 switch (_that) {
 case _TodoModel():
-return $default(_that.id,_that.description,_that.dueDate,_that.category);case _:
+return $default(_that.id,_that.description,_that.isDone,_that.dueDate,_that.category);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -209,10 +210,10 @@ return $default(_that.id,_that.description,_that.dueDate,_that.category);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String description,  DateTime? dueDate,  Category? category)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String description,  bool isDone,  DateTime? dueDate,  Category? category)?  $default,) {final _that = this;
 switch (_that) {
 case _TodoModel() when $default != null:
-return $default(_that.id,_that.description,_that.dueDate,_that.category);case _:
+return $default(_that.id,_that.description,_that.isDone,_that.dueDate,_that.category);case _:
   return null;
 
 }
@@ -224,11 +225,12 @@ return $default(_that.id,_that.description,_that.dueDate,_that.category);case _:
 @JsonSerializable()
 
 class _TodoModel implements TodoModel {
-  const _TodoModel({required this.id, required this.description, this.dueDate, this.category});
+  const _TodoModel({required this.id, required this.description, required this.isDone, this.dueDate, this.category});
   factory _TodoModel.fromJson(Map<String, dynamic> json) => _$TodoModelFromJson(json);
 
 @override final  int id;
 @override final  String description;
+@override final  bool isDone;
 @override final  DateTime? dueDate;
 @override final  Category? category;
 
@@ -245,16 +247,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TodoModel&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.category, category) || other.category == category));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TodoModel&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.isDone, isDone) || other.isDone == isDone)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.category, category) || other.category == category));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,description,dueDate,category);
+int get hashCode => Object.hash(runtimeType,id,description,isDone,dueDate,category);
 
 @override
 String toString() {
-  return 'TodoModel(id: $id, description: $description, dueDate: $dueDate, category: $category)';
+  return 'TodoModel(id: $id, description: $description, isDone: $isDone, dueDate: $dueDate, category: $category)';
 }
 
 
@@ -265,7 +267,7 @@ abstract mixin class _$TodoModelCopyWith<$Res> implements $TodoModelCopyWith<$Re
   factory _$TodoModelCopyWith(_TodoModel value, $Res Function(_TodoModel) _then) = __$TodoModelCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String description, DateTime? dueDate, Category? category
+ int id, String description, bool isDone, DateTime? dueDate, Category? category
 });
 
 
@@ -282,11 +284,12 @@ class __$TodoModelCopyWithImpl<$Res>
 
 /// Create a copy of TodoModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? dueDate = freezed,Object? category = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? isDone = null,Object? dueDate = freezed,Object? category = freezed,}) {
   return _then(_TodoModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String,dueDate: freezed == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable
+as String,isDone: null == isDone ? _self.isDone : isDone // ignore: cast_nullable_to_non_nullable
+as bool,dueDate: freezed == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as Category?,
   ));
