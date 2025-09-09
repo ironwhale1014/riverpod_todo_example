@@ -14,7 +14,8 @@ class TodoCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
-      leading: Text(model.description),
+      leading: Checkbox(value: true, onChanged: (value) {}),
+      title: Text(model.description, style: TextStyle(fontSize: 24)),
       subtitle: Text(
         model.dueDate != null
             ? getDateToString(model.dueDate!)

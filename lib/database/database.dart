@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:drift_todo_train/common/util/get_db_file.dart';
 import 'package:drift_todo_train/database/converter/color_converter.dart';
+import 'package:drift_todo_train/database/database.steps.dart';
 import 'package:drift_todo_train/database/tables.dart';
 import 'package:drift_todo_train/repository/category_repository.dart';
 import 'package:drift_todo_train/repository/todo_repository.dart';
@@ -17,10 +18,21 @@ part 'database.g.dart';
   include: {'sql.drift'},
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(LazyDatabase(_openConnection));
+  AppDatabase([QueryExecutor? e]) : super(e ?? LazyDatabase(_openConnection));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onUpgrade: stepByStep(
+        from1To2: (m, schema) async {
+          m.addColumn(schema.todoEntries, schema.todoEntries.isDone);
+        },
+      ),
+    );
+  }
 }
 
 LazyDatabase _openConnection() {

@@ -11,6 +11,8 @@ class TodoEntries extends Table with PrimaryKey {
 
   DateTimeColumn get dueData => dateTime().nullable()();
 
+  BoolColumn get isDone => boolean().withDefault(const Constant(false))();
+
   IntColumn get category =>
       integer().nullable().references(CategoryEntries, #id)();
 }
