@@ -1,8 +1,9 @@
 import 'package:drift_todo_train/common/ui/common_listview.dart';
+import 'package:drift_todo_train/common/ui/component/custom_dialog.dart';
 import 'package:drift_todo_train/common/ui/component/custom_text_form_field.dart';
 import 'package:drift_todo_train/domain/category.dart';
-import 'package:drift_todo_train/screen/component/category_card.dart';
-import 'package:drift_todo_train/screen/component/edit_category.dart';
+import 'package:drift_todo_train/screen/component/card/category_card.dart';
+import 'package:drift_todo_train/screen/component/dialog/edit_category.dart';
 import 'package:drift_todo_train/service/category_service.dart';
 import 'package:drift_todo_train/service/category_state_provider.dart';
 import 'package:drift_todo_train/service/state_model/base_state_model.dart';
@@ -35,7 +36,7 @@ class _CategoryListView extends ConsumerWidget {
     return Expanded(
       child: CommonListview<Category, BaseStateModel<Category>>(
         provider: categoryServiceProvider,
-        itemBuilder: (cotext, index, model) => InkWell(
+        itemBuilder: (context, index, model) => InkWell(
           onTap: () {
             ref.read(categoryStateProvider.notifier).setCategory(model);
             // 카드를 탭했을 때의 기본 동작 (예: 해당 카테고리 상세 페이지로 이동)
@@ -45,15 +46,28 @@ class _CategoryListView extends ConsumerWidget {
                 duration: const Duration(seconds: 1),
               ),
             );
-            cotext.pop();
+            context.pop();
           },
           child: CategoryCard(
             category: model,
             onEdit: () {
-              showEditCategory(cotext, model);
+              showEditCategory(context, model);
             },
             onDelete: () {
-              ref.read(categoryServiceProvider.notifier).deleteCategory(model);
+              showCustomConfirmDialog(
+                context: context,
+                title: 'delete category',
+                content: Text(
+                  'delete "${model.name}" category?',
+                  textAlign: TextAlign.center,
+                ),
+                onConfirm: () {
+                  ref
+                      .read(categoryServiceProvider.notifier)
+                      .deleteCategory(model);
+                  context.pop();
+                },
+              );
             },
           ),
         ),

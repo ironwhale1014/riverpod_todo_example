@@ -39,38 +39,40 @@ class CategoryCard extends StatelessWidget {
         ],
       ),
       // 오른쪽 끝에 팝업 메뉴 버튼을 배치합니다.
-      trailing: PopupMenuButton<String>(
-        onSelected: (value) {
-          // 메뉴 항목 선택 시 호출될 로직
-          if (value == 'edit') {
-            onEdit();
-          } else if (value == 'delete') {
-            onDelete();
-          }
-        },
-        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-          const PopupMenuItem<String>(
-            value: 'edit',
-            child: Row(
-              children: [
-                Icon(Icons.edit, size: 20),
-                SizedBox(width: 8),
-                Text('수정'),
+      trailing: category.name != null
+          ? PopupMenuButton<String>(
+              onSelected: (value) {
+                // 메뉴 항목 선택 시 호출될 로직
+                if (value == 'edit') {
+                  onEdit();
+                } else if (value == 'delete') {
+                  onDelete();
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, size: 20),
+                      SizedBox(width: 8),
+                      Text('수정'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outline, size: 20),
+                      SizedBox(width: 8),
+                      Text('삭제'),
+                    ],
+                  ),
+                ),
               ],
-            ),
-          ),
-          const PopupMenuItem<String>(
-            value: 'delete',
-            child: Row(
-              children: [
-                Icon(Icons.delete_outline, size: 20),
-                SizedBox(width: 8),
-                Text('삭제'),
-              ],
-            ),
-          ),
-        ],
-      ),
+            )
+          : SizedBox(width: 48,),
     );
   }
 }

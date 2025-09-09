@@ -19,7 +19,7 @@ class _EditDialog extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final categoryController = useTextEditingController(text: category.name);
     return AlertDialog(
-      title: Text('edit or delete'),
+      title: Text('edit'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [CustomTextFormField(controller: categoryController)],

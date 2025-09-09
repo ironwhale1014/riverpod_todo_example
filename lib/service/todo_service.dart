@@ -1,3 +1,4 @@
+import 'package:drift_todo_train/common/util/logger.dart';
 import 'package:drift_todo_train/domain/todo_model.dart';
 import 'package:drift_todo_train/repository/todo_repository.dart';
 import 'package:drift_todo_train/service/category_state_provider.dart';
@@ -22,9 +23,12 @@ class TodoService extends _$TodoService {
     state = LoadedModel(todosWithCategory);
   }
 
-  Future<void> save(String description) async {
-    final category = ref.watch(categoryStateProvider);
-    ref.read(todoRepositoryProvider).createTodoEntry(description, category);
+  Future<void> save(String description, DateTime? dueDate) async {
+    logger.d(dueDate);
+    final category = ref.read(categoryStateProvider);
+    ref
+        .read(todoRepositoryProvider)
+        .createTodoEntry(description, category, dueDate);
     ref.invalidateSelf();
   }
 

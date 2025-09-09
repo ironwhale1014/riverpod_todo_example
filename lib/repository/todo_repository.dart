@@ -69,10 +69,12 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
   Future<TodoModel> createTodoEntry(
     String description,
     Category? category,
+    DateTime? dueDate,
   ) async {
     final todo = TodoEntriesCompanion.insert(
       description: description,
       category: Value(category?.id),
+      dueData: Value(dueDate),
     );
 
     final id = await todoEntries.insertOne(todo);
@@ -98,6 +100,7 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
   TodoModel _todoModelMapper(row, count) => TodoModel(
     id: row.todo.id,
     description: row.todo.description,
+    dueDate: row.todo.dueData,
     category: (row.category != null)
         ? Category(
             id: row.category!.id,
