@@ -1,58 +1,58 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'todo_service.dart';
+part of 'filter_state_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-@ProviderFor(TodoService)
-const todoServiceProvider = TodoServiceProvider._();
+@ProviderFor(TodoListFilterState)
+const todoListFilterStateProvider = TodoListFilterStateProvider._();
 
-final class TodoServiceProvider
-    extends $NotifierProvider<TodoService, BaseStateModel<TodoModel>> {
-  const TodoServiceProvider._()
+final class TodoListFilterStateProvider
+    extends $NotifierProvider<TodoListFilterState, TodoListFilter> {
+  const TodoListFilterStateProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'todoServiceProvider',
+        name: r'todoListFilterStateProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$todoServiceHash();
+  String debugGetCreateSourceHash() => _$todoListFilterStateHash();
 
   @$internal
   @override
-  TodoService create() => TodoService();
+  TodoListFilterState create() => TodoListFilterState();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(BaseStateModel<TodoModel> value) {
+  Override overrideWithValue(TodoListFilter value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<BaseStateModel<TodoModel>>(value),
+      providerOverride: $SyncValueProvider<TodoListFilter>(value),
     );
   }
 }
 
-String _$todoServiceHash() => r'b1ed9ffeb4a59907fff1b54612a57139b5ba95da';
+String _$todoListFilterStateHash() =>
+    r'c24693b86035efded4795feea09419a76a45911a';
 
-abstract class _$TodoService extends $Notifier<BaseStateModel<TodoModel>> {
-  BaseStateModel<TodoModel> build();
+abstract class _$TodoListFilterState extends $Notifier<TodoListFilter> {
+  TodoListFilter build();
   @$mustCallSuper
   @override
   void runBuild() {
     final created = build();
-    final ref =
-        this.ref as $Ref<BaseStateModel<TodoModel>, BaseStateModel<TodoModel>>;
+    final ref = this.ref as $Ref<TodoListFilter, TodoListFilter>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<BaseStateModel<TodoModel>, BaseStateModel<TodoModel>>,
-              BaseStateModel<TodoModel>,
+              AnyNotifier<TodoListFilter, TodoListFilter>,
+              TodoListFilter,
               Object?,
               Object?
             >;

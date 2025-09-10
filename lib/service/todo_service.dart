@@ -2,6 +2,7 @@ import 'package:drift_todo_train/common/util/logger.dart';
 import 'package:drift_todo_train/domain/todo_model.dart';
 import 'package:drift_todo_train/repository/todo_repository.dart';
 import 'package:drift_todo_train/service/category_state_provider.dart';
+import 'package:drift_todo_train/service/filter_state_provider.dart';
 import 'package:drift_todo_train/service/state_model/base_state_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -17,9 +18,11 @@ class TodoService extends _$TodoService {
 
   Future<void> paginate() async {
     final category = ref.watch(categoryStateProvider);
+    final filter = ref.watch(todoListFilterStateProvider);
+
     final todosWithCategory = await ref
         .read(todoRepositoryProvider)
-        .getTodosWithCategoryEntries(category);
+        .getTodosWithCategoryEntries(category, filter: filter);
     state = LoadedModel(todosWithCategory);
   }
 

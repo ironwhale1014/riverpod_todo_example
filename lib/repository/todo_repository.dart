@@ -3,6 +3,7 @@ import 'package:drift_todo_train/database/database.dart';
 import 'package:drift_todo_train/database/tables.dart';
 import 'package:drift_todo_train/domain/category.dart';
 import 'package:drift_todo_train/domain/todo_model.dart';
+import 'package:drift_todo_train/service/filter_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'todo_repository.g.dart';
@@ -26,8 +27,9 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
 
   // Method to watch todos with their categories
   Future<List<TodoModel>> getTodosWithCategoryEntries(
-    Category? category,
-  ) async {
+    Category? category, {
+    TodoListFilter filter = TodoListFilter.all,
+  }) async {
     final query = select(todoEntries).join([
       leftOuterJoin(
         categoryEntries,
@@ -41,10 +43,18 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
       query.where(todoEntries.category.isNull());
     }
 
-    final List<TodoWithCategoryFromEntry> todos = (await query.get())
-        .map(_mapper)
-        .toList();
+    final List<TodoWithCategoryFromEntry> todos = [];
 
+    switch (filter) {
+      case TodoListFilter.all:
+        break;
+      case TodoListFilter.uncompleted:
+        query.where(todoEntries.isDone.equals(false));
+      case TodoListFilter.completed:
+        query.where(todoEntries.isDone.equals(true));
+    }
+
+    todos.addAll((await query.get()).map(_mapper).toList());
     final count = todos.length;
 
     return todos.map((row) => _todoModelMapper(row, count)).toList();

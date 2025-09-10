@@ -4,6 +4,7 @@ import 'package:drift_todo_train/domain/todo_model.dart';
 import 'package:drift_todo_train/screen/component/card/todo_card.dart';
 import 'package:drift_todo_train/screen/component/custom_drawer.dart';
 import 'package:drift_todo_train/screen/component/dialog/add_todo.dart';
+import 'package:drift_todo_train/screen/component/toolbar.dart';
 import 'package:drift_todo_train/service/category_state_provider.dart';
 import 'package:drift_todo_train/service/state_model/base_state_model.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
@@ -33,6 +34,7 @@ class HomePage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Toolbar(),
             Expanded(
               child: CommonListview<TodoModel, BaseStateModel<TodoModel>>(
                 provider: todoServiceProvider,
