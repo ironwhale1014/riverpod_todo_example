@@ -1,5 +1,4 @@
 import 'package:drift_todo_train/common/ui/common_listview.dart';
-import 'package:drift_todo_train/common/ui/component/custom_dialog.dart';
 import 'package:drift_todo_train/common/ui/layout.dart';
 import 'package:drift_todo_train/domain/todo_model.dart';
 import 'package:drift_todo_train/screen/component/card/todo_card.dart';
@@ -9,7 +8,6 @@ import 'package:drift_todo_train/service/category_state_provider.dart';
 import 'package:drift_todo_train/service/state_model/base_state_model.dart';
 import 'package:drift_todo_train/service/todo_service.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class HomePage extends ConsumerWidget {
@@ -38,12 +36,7 @@ class HomePage extends ConsumerWidget {
             Expanded(
               child: CommonListview<TodoModel, BaseStateModel<TodoModel>>(
                 provider: todoServiceProvider,
-                itemBuilder: (context, index, model) => InkWell(
-                  onTap: () {
-                    showAddTodoDialog(context, model);
-                  },
-                  child: TodoCard(model),
-                ),
+                itemBuilder: (context, index, model) => TodoCard(model),
               ),
             ),
           ],
